@@ -1,28 +1,27 @@
 import { Janitor } from "@rbxts/janitor";
-import { doesImplement } from "../guards";
-import { onEnd } from "../lifecycle";
-import { View } from "./util/view";
-import { System } from "./system";
+import { View } from "./private/view";
+import { System, onEnd } from "..";
+import { doesImplement } from "./types/guards";
 
 /**
  * App is the container for the framework's state. Everything within this class should
  * remiain static as it is not instantiated.
  */
-export class App {
+export class BridgeState {
 	private constructor() {}
 
-	static janitor = new Janitor();
-	static windows = new Map<string, View>();
-	static systems = new Map<string, System>();
+	static readonly systems = new Map<string, System>();
+	static readonly windows = new Map<string, View>();
+	static readonly janitor = new Janitor();
 
 	static toolbar: PluginToolbar | undefined = undefined;
+	static initialized: boolean = false;
 	static plugin: Plugin;
 	static name: string;
-	static initialized: boolean;
 
 	// Flags
-	static debugEnabled: boolean;
-	static runInPlaytestEnabled: boolean;
+	static runInPlaytestEnabled: boolean = false;
+	static debugEnabled: boolean = false;
 
 	static log(method: (val: string) => void, val: string) {
 		method(`[Bridge] ${val}`);

@@ -1,10 +1,8 @@
-import { ToolbarButton } from "./bridge/util/toolbarButton";
-import { View } from "./bridge/util/view";
+import { Button } from "./bridge/private/button";
+import { View } from "./bridge/private/view";
 
-export { System } from "./bridge/system";
-export { bridge } from "./bridge/bridge";
+export { System, bridge, onInit, onStart, onRender, onEnd } from "./bridge";
+export { Networking } from "./bridge/networking";
 
-export * from "./lifecycle";
-
-export type BridgeButton = ToolbarButton;
+export type BridgeButton = Button;
 export type BridgeView = View;

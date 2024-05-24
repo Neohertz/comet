@@ -1,10 +1,10 @@
 import { HttpService } from "@rbxts/services";
-import { App } from "../app";
+import { BridgeState } from "../state";
 
 /**
  * This class utilizes builder functions to easily construct context menus.
  */
-export class ContextMenu {
+export class Menu {
 	private rootMenu: PluginMenu;
 	private currentMenu: PluginMenu;
 
@@ -15,12 +15,12 @@ export class ContextMenu {
 		this.menus = new Array();
 		this.actions = new Array();
 
-		this.rootMenu = App.plugin.CreatePluginMenu(HttpService.GenerateGUID());
+		this.rootMenu = BridgeState.plugin.CreatePluginMenu(HttpService.GenerateGUID());
 		this.currentMenu = this.rootMenu;
 
 		this.menus.push(this.rootMenu);
 
-		App.janitor.Add(() => this.cleanup());
+		BridgeState.janitor.Add(() => this.cleanup());
 	}
 
 	private cleanup() {
@@ -52,8 +52,8 @@ export class ContextMenu {
 	 */
 	action(title: string, icon?: string, cb?: () => void) {
 		const action = this.currentMenu.AddNewAction(HttpService.GenerateGUID(), title, icon);
-		App.janitor.Add(action);
-		App.janitor.Add(action.Triggered.Connect(() => cb?.()));
+		BridgeState.janitor.Add(action);
+		BridgeState.janitor.Add(action.Triggered.Connect(() => cb?.()));
 		return this;
 	}
 
@@ -63,7 +63,7 @@ export class ContextMenu {
 	 * @param icon
 	 */
 	submenu(title?: string, icon?: string) {
-		const menu = App.plugin.CreatePluginMenu(HttpService.GenerateGUID(), title, icon);
+		const menu = BridgeState.plugin.CreatePluginMenu(HttpService.GenerateGUID(), title, icon);
 		menu.Title = title ?? "";
 		this.currentMenu.AddMenu(menu);
 		this.currentMenu = menu;

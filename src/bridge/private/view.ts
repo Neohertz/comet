@@ -1,14 +1,14 @@
 import { HttpService } from "@rbxts/services";
-import { App } from "../app";
-import { ToolbarButton } from "./toolbarButton";
-import { Bind } from "./bind";
+import { Button } from "./button";
+import { BridgeState } from "../state";
+import { Networking } from "../networking";
 
 /**
  * A view is a container for GUI elements.
  */
 export class View {
-	private container: DockWidgetPluginGui | ScreenGui;
-	private onCloseBind: Bind<[]>;
+	readonly container: DockWidgetPluginGui | ScreenGui;
+	private onCloseBind: Networking.Event;
 
 	/**
 	 * Create a window that renders on the viewport.
@@ -24,12 +24,13 @@ export class View {
 	 */
 	constructor(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState);
 	constructor(name: string, size?: Vector2, maxSize?: Vector2, dockState = Enum.InitialDockState.Float) {
-		assert(App.getWindow(name) === undefined, "[Bridge] Detected multiple windows with the same name.");
-		this.onCloseBind = new Bind();
+		assert(BridgeState.getWindow(name) === undefined, "[Bridge] Detected multiple windows with the same name.");
+
+		this.onCloseBind = Networking.Event();
 
 		// If both size and maxSize are given, we know we are creating a dock widget.
 		if (size && maxSize) {
-			this.container = App.plugin.CreateDockWidgetPluginGui(
+			this.container = BridgeState.plugin.CreateDockWidgetPluginGui(
 				HttpService.GenerateGUID(),
 				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, maxSize.X, maxSize.Y),
 			);
@@ -40,7 +41,7 @@ export class View {
 			this.container = new Instance("ScreenGui", game.GetService("CoreGui"));
 			this.container.IgnoreGuiInset = true;
 			this.container.Enabled = false;
-			App.janitor.Add(this.container);
+			BridgeState.janitor.Add(this.container);
 		}
 	}
 
@@ -72,7 +73,7 @@ export class View {
 	 * Link a toolbar button to the view so that the button's state controls the view's visibility and vice-versa.
 	 * @param button Button
 	 */
-	linkButton(button: ToolbarButton) {
+	linkButton(button: Button) {
 		this.onCloseBind.connect(() => button.setPressed(false));
 		button.onPress((state) => this.setVisible(state));
 	}
@@ -81,8 +82,8 @@ export class View {
 	 * If the viewport is enabled, it will return its size.
 	 * @returns Vector2
 	 */
-	getViewportSize(): Vector2 | undefined {
-		if (this.container.Enabled) return this.container.AbsoluteSize;
+	getViewportSize(): Vector2 {
+		return this.container.AbsoluteSize;
 	}
 
 	/**
@@ -100,10 +101,10 @@ export class View {
 
 		if (typeIs(element, "function")) {
 			const cb = element(this.container);
-			App.janitor.Add(() => cb());
+			BridgeState.janitor.Add(() => cb());
 		} else {
 			(element as GuiBase).Parent = this.container;
-			App.janitor.Add(element);
+			BridgeState.janitor.Add(element);
 			return element;
 		}
 	}
