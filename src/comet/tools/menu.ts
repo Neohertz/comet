@@ -1,5 +1,5 @@
 import { HttpService } from "@rbxts/services";
-import { BridgeState } from "../state";
+import { CometState } from "../state";
 
 /**
  * This class utilizes builder functions to easily construct context menus.
@@ -15,12 +15,12 @@ export class Menu {
 		this.menus = new Array();
 		this.actions = new Array();
 
-		this.rootMenu = BridgeState.plugin.CreatePluginMenu(HttpService.GenerateGUID());
+		this.rootMenu = CometState.plugin.CreatePluginMenu(HttpService.GenerateGUID());
 		this.currentMenu = this.rootMenu;
 
 		this.menus.push(this.rootMenu);
 
-		BridgeState.janitor.Add(() => this.cleanup());
+		CometState.janitor.Add(() => this.cleanup());
 	}
 
 	private cleanup() {
@@ -52,8 +52,8 @@ export class Menu {
 	 */
 	action(title: string, icon?: string, cb?: () => void) {
 		const action = this.currentMenu.AddNewAction(HttpService.GenerateGUID(), title, icon);
-		BridgeState.janitor.Add(action);
-		BridgeState.janitor.Add(action.Triggered.Connect(() => cb?.()));
+		CometState.janitor.Add(action);
+		CometState.janitor.Add(action.Triggered.Connect(() => cb?.()));
 		return this;
 	}
 
@@ -63,7 +63,7 @@ export class Menu {
 	 * @param icon
 	 */
 	submenu(title?: string, icon?: string) {
-		const menu = BridgeState.plugin.CreatePluginMenu(HttpService.GenerateGUID(), title, icon);
+		const menu = CometState.plugin.CreatePluginMenu(HttpService.GenerateGUID(), title, icon);
 		menu.Title = title ?? "";
 		this.currentMenu.AddMenu(menu);
 		this.currentMenu = menu;

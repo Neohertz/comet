@@ -1,5 +1,5 @@
 import { Networking } from "../networking";
-import { BridgeState } from "../state";
+import { CometState } from "../state";
 
 /**
  * Toolbar button instance with many great features.
@@ -11,18 +11,18 @@ export class Button {
 	private toggleable: boolean;
 	private clickEvent: Networking.Event;
 
-	constructor(text: string, toolTip: string, image: string, toggleable: boolean) {
-		if (!BridgeState.toolbar) {
-			BridgeState.toolbar = BridgeState.plugin.CreateToolbar(BridgeState.name);
+	constructor(text: string, toolTip: string, image: string, toggleable = true) {
+		if (!CometState.toolbar) {
+			CometState.toolbar = CometState.plugin.CreateToolbar(CometState.name);
 		}
 
 		this.clickEvent = Networking.Event();
 
-		this.button = BridgeState.toolbar.CreateButton(text, toolTip, image);
+		this.button = CometState.toolbar.CreateButton(text, toolTip, image);
 		this.toggleable = toggleable;
 		this.state = false;
 
-		BridgeState.janitor.Add(
+		CometState.janitor.Add(
 			this.button.Click.Connect(() => {
 				if (this.toggleable) {
 					this.state = !this.state;

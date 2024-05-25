@@ -1,4 +1,4 @@
-import { BridgeState } from "../state";
+import { CometState } from "../state";
 
 export namespace Networking {
 	export interface Event<T extends unknown[] = []> {
@@ -11,25 +11,23 @@ export namespace Networking {
 		callback: (cb: (...args: T) => Promise<R>) => void;
 	}
 
-	const events = new Map<string, Event<unknown[]>>();
-
 	export function Event<T extends Array<unknown> = []>(): Event<T> {
 		const event = new Instance("BindableEvent", script);
-		BridgeState.janitor.Add(event);
+		CometState.janitor.Add(event);
 
 		return {
 			fire: (...args: T) => {
 				event.Fire(...args);
 			},
 			connect: (cb: (...args: T) => void) => {
-				return BridgeState.janitor.Add(event.Event.Connect(cb));
+				return CometState.janitor.Add(event.Event.Connect(cb));
 			},
 		};
 	}
 
 	export function Function<T extends Array<unknown>, R>(): Function<T, R> {
 		const func = new Instance("BindableFunction", script);
-		BridgeState.janitor.Add(func);
+		CometState.janitor.Add(func);
 
 		return {
 			invoke: async (...args: T) => {

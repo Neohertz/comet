@@ -1,10 +1,10 @@
-import { View } from "./private/view";
-import { Menu } from "./private/menu";
-import { Button } from "./private/button";
+import { View } from "./tools/view";
+import { Menu } from "./tools/menu";
+import { Button } from "./tools/button";
 import { doesImplement } from "./types/guards";
 import { RunService } from "@rbxts/services";
-import { SFX } from "./private/sfx";
-import { BridgeState } from "./state";
+import { SFX } from "./tools/sfx";
+import { CometState } from "./state";
 
 /**
  * Allows passing a class itself instead of an instnace.
@@ -14,32 +14,32 @@ interface ClassRef<T> {
 }
 
 /*
-	Bridge.ts
+	comet.ts
 	A compact plugin framework that abstracts the roblox plugin API into a single place.
 */
-export class bridge {
+export namespace Comet {
 	/**
 	 * Create an app instance.
 	 * @param plugin
 	 * @param name
 	 */
-	static createApp(plugin: Plugin, name: string) {
-		assert(!BridgeState.initialized, "[Bridge] App was initialized twice.");
-		assert(plugin, "[Bridge] Passed reference to plugin is undefined.");
-		BridgeState.plugin = plugin;
-		BridgeState.initialized = true;
-		BridgeState.name = name;
-		BridgeState.plugin.Unloading.Connect(() => BridgeState.unload());
+	export function createApp(plugin: Plugin, name: string) {
+		assert(!CometState.initialized, "[Comet] App was initialized twice.");
+		assert(plugin, "[Comet] Plugin reference passed within createApp() is undefined!");
+		CometState.plugin = plugin;
+		CometState.initialized = true;
+		CometState.name = name;
+		CometState.plugin.Unloading.Connect(() => CometState.unload());
 	}
 
 	/**
 	 * Add a system by reference to the framework.
 	 * @param system
 	 */
-	static registerSystem(system: ClassRef<System>) {
-		assert(BridgeState.initialized, "[Bridge] Attempted to add system before initializing app.");
+	export function registerSystem(system: ClassRef<System>) {
+		assert(CometState.initialized, "[Comet] Attempted to add system before initializing app.");
 		const newSystem = new system();
-		BridgeState.systems.set(tostring(system), newSystem);
+		CometState.systems.set(tostring(system), newSystem);
 	}
 
 	/**
@@ -47,12 +47,12 @@ export class bridge {
 	 * @param system
 	 * @deprecated
 	 */
-	static registerSystemFolder(system: Folder) {
+	export function registerSystemFolder(system: Folder) {
 		for (const inst of system.GetChildren()) {
-			assert(inst.IsA("ModuleScript"), `[Bridge] "system" ${inst.Name} isn't a module.`);
-			assert(inst.Source.find("System"), `[Bridge] system ${inst.Name} is not a valid system.`);
+			assert(inst.IsA("ModuleScript"), `[Comet] "system" ${inst.Name} isn't a module.`);
+			assert(inst.Source.find("System"), `[Comet] system ${inst.Name} is not a valid system.`);
 			const req = require(inst) as ClassRef<System>;
-			this.registerSystem(req);
+			registerSystem(req);
 		}
 	}
 
@@ -60,25 +60,25 @@ export class bridge {
 	 * Launch all systems in the framework.
 	 * @returns
 	 */
-	static launch() {
-		assert(BridgeState.initialized, "[Bridge] Attempted to launch before initializing app.");
-		if (BridgeState.systems.size() === 0) BridgeState.log(warn, "No systems have been registered.");
+	export function launch() {
+		assert(CometState.initialized, "[Comet] Attempted to launch before initializing app.");
+		if (CometState.systems.size() === 0) CometState.log(warn, "No systems have been registered.");
 
-		if (!BridgeState.runInPlaytestEnabled && RunService.IsRunning()) return;
+		if (!CometState.runInPlaytestEnabled && RunService.IsRunning()) return;
 
-		if (BridgeState.debugEnabled) {
-			BridgeState.log(warn, "Debugging Enabled");
-			BridgeState.log(print, `${BridgeState.systems.size()} systems registered.`);
+		if (CometState.debugEnabled) {
+			CometState.log(warn, "Debugging Enabled");
+			CometState.log(print, `${CometState.systems.size()} systems registered.`);
 		}
 
 		// Initialize Systems
-		for (const [key, system] of BridgeState.systems) {
+		for (const [key, system] of CometState.systems) {
 			if (doesImplement<onInit>(system, "onInit")) {
 				system.onInit();
 			}
 		}
 
-		for (const [key, system] of BridgeState.systems) {
+		for (const [key, system] of CometState.systems) {
 			// Start Systems
 			if (doesImplement<onStart>(system, "onStart")) {
 				task.spawn(() => system.onStart());
@@ -86,7 +86,7 @@ export class bridge {
 
 			// Bind system to render stepped.
 			if (doesImplement<onRender>(system, "onRender")) {
-				BridgeState.janitor.Add(
+				CometState.janitor.Add(
 					RunService.RenderStepped.Connect((dt) => {
 						system.onRender(dt);
 					}),
@@ -95,8 +95,8 @@ export class bridge {
 		}
 	}
 
-	static enableDebugging() {
-		BridgeState.debugEnabled = true;
+	export function enableDebugging() {
+		CometState.debugEnabled = true;
 	}
 }
 
@@ -105,15 +105,11 @@ export class System {
 	 * A reference to plugin is suppled for extraordinary usage.
 	 */
 	readonly plugin: Plugin;
-
-	/**
-	 * A reference to the FX engine for sounds.
-	 */
 	private sfxManager: SFX;
 
 	constructor() {
 		this.sfxManager = new SFX();
-		this.plugin = BridgeState.plugin;
+		this.plugin = CometState.plugin;
 	}
 
 	/**
@@ -121,7 +117,7 @@ export class System {
 	 * @returns Janitor
 	 */
 	getJanitor() {
-		return BridgeState.janitor;
+		return CometState.janitor;
 	}
 
 	/**
@@ -133,11 +129,11 @@ export class System {
 	 * @returns T
 	 */
 	use<T extends System>(base: ClassRef<T>): Omit<T, keyof System> {
-		const classRef = BridgeState.systems.get(tostring(base));
+		const classRef = CometState.systems.get(tostring(base));
 
 		assert(
 			classRef,
-			`[Bridge] use(${tostring(base)}) called, but ${tostring(base)} has not been initialized. Did you forget to register the system?`,
+			`[Comet] use(${tostring(base)}) called, but ${tostring(base)} has not been initialized. Did you forget to register the system?`,
 		);
 
 		return classRef as T;
@@ -172,13 +168,14 @@ export class System {
 
 	/**
 	 * Create a toolbar button.
-	 * @param text
-	 * @param toolTip
-	 * @param image
+	 * @param text string
+	 * @param toolTip string
+	 * @param image string
+	 * @param toggleable bool? (defaults to true)
 	 * @returns
 	 */
-	createButton(text: string, toolTip = "", image = "", toggle = false) {
-		return new Button(text, toolTip, image, toggle);
+	createButton(text: string, toolTip = "", image = "", toggleable = true) {
+		return new Button(text, toolTip, image, toggleable);
 	}
 
 	/**
@@ -187,7 +184,7 @@ export class System {
 	 */
 	createOverlay(name: string): View {
 		const window = new View(name);
-		BridgeState.addWindow(name, window);
+		CometState.windows.set(name, window);
 		return window;
 	}
 
@@ -200,7 +197,7 @@ export class System {
 	 */
 	createWidget(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState): View {
 		const window = new View(name, size, maxSize, dockState);
-		BridgeState.addWindow(name, window);
+		CometState.windows.set(name, window);
 		return window;
 	}
 

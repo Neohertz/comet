@@ -1,15 +1,22 @@
 {
-	"name": "@rbxts/bridge.ts",
-	"version": "1.0.0",
-	"description": "",
+	"name": "@rbxts/comet",
+	"version": "1.0.3",
+	"description": "A fast framework for plugin development inspired by flamework.",
+	"repository": "https://github.com/Neohertz/comet",
+	"homepage": "https://neohertz.dev/docs/comet/about",
 	"main": "out/init.lua",
 	"scripts": {
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w",
 		"prepublishOnly": "npm run build"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"rbxts",
+		"framework",
+		"comet",
+		"plugin"
+	],
+	"author": "Neohertz",
 	"license": "ISC",
 	"types": "out/index.d.ts",
 	"files": [

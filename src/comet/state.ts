@@ -1,5 +1,5 @@
 import { Janitor } from "@rbxts/janitor";
-import { View } from "./private/view";
+import { View } from "./tools/view";
 import { System, onEnd } from "..";
 import { doesImplement } from "./types/guards";
 
@@ -7,7 +7,7 @@ import { doesImplement } from "./types/guards";
  * App is the container for the framework's state. Everything within this class should
  * remiain static as it is not instantiated.
  */
-export class BridgeState {
+export class CometState {
 	private constructor() {}
 
 	static readonly systems = new Map<string, System>();
@@ -24,15 +24,7 @@ export class BridgeState {
 	static debugEnabled: boolean = false;
 
 	static log(method: (val: string) => void, val: string) {
-		method(`[Bridge] ${val}`);
-	}
-
-	static addWindow(id: string, window: View) {
-		this.windows.set(id, window);
-	}
-
-	static getWindow(id: string) {
-		return this.windows.get(id);
+		method(`[Comet] ${val}`);
 	}
 
 	static unload() {

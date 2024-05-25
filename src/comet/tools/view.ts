@@ -1,6 +1,6 @@
 import { HttpService } from "@rbxts/services";
 import { Button } from "./button";
-import { BridgeState } from "../state";
+import { CometState } from "../state";
 import { Networking } from "../networking";
 
 /**
@@ -24,13 +24,13 @@ export class View {
 	 */
 	constructor(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState);
 	constructor(name: string, size?: Vector2, maxSize?: Vector2, dockState = Enum.InitialDockState.Float) {
-		assert(BridgeState.getWindow(name) === undefined, "[Bridge] Detected multiple windows with the same name.");
+		assert(!CometState.windows.has(name), "[Comet] Detected multiple windows with the same name.");
 
 		this.onCloseBind = Networking.Event();
 
 		// If both size and maxSize are given, we know we are creating a dock widget.
 		if (size && maxSize) {
-			this.container = BridgeState.plugin.CreateDockWidgetPluginGui(
+			this.container = CometState.plugin.CreateDockWidgetPluginGui(
 				HttpService.GenerateGUID(),
 				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, maxSize.X, maxSize.Y),
 			);
@@ -41,7 +41,7 @@ export class View {
 			this.container = new Instance("ScreenGui", game.GetService("CoreGui"));
 			this.container.IgnoreGuiInset = true;
 			this.container.Enabled = false;
-			BridgeState.janitor.Add(this.container);
+			CometState.janitor.Add(this.container);
 		}
 	}
 
@@ -101,10 +101,10 @@ export class View {
 
 		if (typeIs(element, "function")) {
 			const cb = element(this.container);
-			BridgeState.janitor.Add(() => cb());
+			CometState.janitor.Add(() => cb());
 		} else {
 			(element as GuiBase).Parent = this.container;
-			BridgeState.janitor.Add(element);
+			CometState.janitor.Add(element);
 			return element;
 		}
 	}
