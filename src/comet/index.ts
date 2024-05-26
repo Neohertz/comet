@@ -2,12 +2,12 @@ import { View } from "./tools/view";
 import { Menu } from "./tools/menu";
 import { Button } from "./tools/button";
 import { doesImplement } from "./types/guards";
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 import { SFX } from "./tools/sfx";
 import { CometState } from "./state";
 
 /**
- * Allows passing a class itself instead of an instnace.
+ * Allows passing a class itself instead of an instance.
  */
 interface ClassRef<T> {
 	new (): T;
@@ -38,6 +38,8 @@ export namespace Comet {
 	 */
 	export function registerSystem(system: ClassRef<System>) {
 		assert(CometState.initialized, "[Comet] Attempted to add system before initializing app.");
+		assert(!CometState.launched, "[Comet] Attempted to register system after calling launch().");
+
 		const newSystem = new system();
 		CometState.systems.set(tostring(system), newSystem);
 	}
@@ -63,6 +65,8 @@ export namespace Comet {
 	export function launch() {
 		assert(CometState.initialized, "[Comet] Attempted to launch before initializing app.");
 		if (CometState.systems.size() === 0) CometState.log(warn, "No systems have been registered.");
+
+		CometState.launched = true;
 
 		if (!CometState.runInPlaytestEnabled && RunService.IsRunning()) return;
 
@@ -95,6 +99,9 @@ export namespace Comet {
 		}
 	}
 
+	/**
+	 * Enable verbose debugging.
+	 */
 	export function enableDebugging() {
 		CometState.debugEnabled = true;
 	}
@@ -102,14 +109,19 @@ export namespace Comet {
 
 export class System {
 	/**
-	 * A reference to plugin is suppled for extraordinary usage.
+	 * A reference to plugin is supplied for extraordinary usage.
 	 */
 	readonly plugin: Plugin;
 	private sfxManager: SFX;
+	private lastRecording: string | undefined;
+	private historyService: ChangeHistoryService;
 
 	constructor() {
 		this.sfxManager = new SFX();
 		this.plugin = CometState.plugin;
+
+		this.historyService = game.GetService("ChangeHistoryService");
+		CometState.janitor.Add(this.historyService.OnRecordingStarted.Connect((name) => (this.lastRecording = name)));
 	}
 
 	/**
@@ -140,7 +152,10 @@ export class System {
 	}
 
 	/**
-	 *
+	 * Play a sound effect.
+	 * This method caches all sounds and may yeild on first call.
+	 * @param soundId string
+	 * @param looped bool? (false)
 	 */
 	playSFX(soundId: string | number, looped = false) {
 		this.sfxManager.playSound(soundId, looped);
@@ -152,7 +167,7 @@ export class System {
 	 * ```ts
 	 * const menu = this.contexMenuBuilder("MyMenu")
 	 * 	.action("Clear Workspace", "", () => {})
-	 * 	.seperator()
+	 * 	.separator()
 	 * 	.submenu("Misc")
 	 * 		.action("Spawn Part", "", () => {})
 	 *
@@ -171,7 +186,7 @@ export class System {
 	 * @param text string
 	 * @param toolTip string
 	 * @param image string
-	 * @param toggleable bool? (defaults to true)
+	 * @param toggleable bool? = true
 	 * @returns
 	 */
 	createButton(text: string, toolTip = "", image = "", toggleable = true) {
@@ -199,6 +214,57 @@ export class System {
 		const window = new View(name, size, maxSize, dockState);
 		CometState.windows.set(name, window);
 		return window;
+	}
+
+	/**
+	 * API for recoding waypoints to undo/redo history.
+	 *
+	 * ```ts
+	 * const waypoint = this.record("My waypoint!");
+	 *
+	 * // Do some logic
+	 * const part = new Instance("Part", Workspace);
+	 *
+	 * if (part) waypoint.commit();
+	 * else waypoint.cancel();
+	 * ```
+	 * @param name
+	 * @param description
+	 * @returns object
+	 */
+	record(name: string, description?: string) {
+		const recording = this.historyService.TryBeginRecording(name, description);
+		assert(
+			recording,
+			`[Comet] Multiple Recordings: Attempted to start recording '${name}' but failed as recording '${this.lastRecording}' was never concluded.`,
+		);
+
+		// NOTE: returning an object here as a class would be a bit unnecessary. This may change as it's not very uniform.
+		return {
+			/**
+			 * Commits the recorded work to the history.
+			 * @param options
+			 */
+			commit: (options?: object) => {
+				this.historyService.FinishRecording(recording, Enum.FinishRecordingOperation.Commit, options);
+			},
+
+			/**
+			 * Commits the recorded work and merges with the previous recording if possible.
+			 * @param options
+			 */
+			append: (options?: object) => {
+				this.historyService.FinishRecording(recording, Enum.FinishRecordingOperation.Append, options);
+			},
+
+			/**
+			 * Cancel the recording, undoing any changes made.
+			 * @param options
+			 */
+			cancel: (options?: object) => {
+				this.historyService.FinishRecording(recording, Enum.FinishRecordingOperation.Cancel, options);
+			},
+		};
 	}
 
 	/**
@@ -232,7 +298,7 @@ export interface onInit {
 
 export interface onStart {
 	/**
-	 * Called asyncronously after the system initializes.
+	 * Called asynchronously after the system initializes.
 	 */
 	onStart(): void | Promise<void>;
 }

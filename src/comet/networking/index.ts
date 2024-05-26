@@ -11,8 +11,6 @@ export namespace Networking {
 		callback: (cb: (...args: T) => Promise<R>) => void;
 	}
 
-	const events = new Map<string, Event<unknown[]>>();
-
 	export function Event<T extends Array<unknown> = []>(): Event<T> {
 		const event = new Instance("BindableEvent", script);
 		CometState.janitor.Add(event);

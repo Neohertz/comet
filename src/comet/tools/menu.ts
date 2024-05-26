@@ -36,9 +36,9 @@ export class Menu {
 	}
 
 	/**
-	 * Seperate Menu
+	 * Separate Menu
 	 */
-	seperator() {
+	separator() {
 		this.currentMenu.AddSeparator();
 		return this;
 	}

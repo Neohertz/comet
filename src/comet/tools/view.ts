@@ -88,9 +88,12 @@ export class View {
 
 	/**
 	 * Mount a GuiBase instance to the window.
+	 *
+	 * Keep in mind that this method does not clone the instance.
 	 * @param element `GuiBase`
+	 * @returns element
 	 */
-	mount<T extends GuiBase>(element: T): void;
+	mount<T extends GuiBase>(element: T): T;
 	/**
 	 * Custom mounting method. Used to integrate ui-libraries like react and fusion.
 	 * @param method (root: Instance) => (() => void)
@@ -101,7 +104,7 @@ export class View {
 
 		if (typeIs(element, "function")) {
 			const cb = element(this.container);
-			CometState.janitor.Add(() => cb());
+			CometState.janitor.Add(cb, true);
 		} else {
 			(element as GuiBase).Parent = this.container;
 			CometState.janitor.Add(element);

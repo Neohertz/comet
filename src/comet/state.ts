@@ -5,7 +5,7 @@ import { doesImplement } from "./types/guards";
 
 /**
  * App is the container for the framework's state. Everything within this class should
- * remiain static as it is not instantiated.
+ * remain static as it is not instantiated.
  */
 export class CometState {
 	private constructor() {}
@@ -16,6 +16,7 @@ export class CometState {
 
 	static toolbar: PluginToolbar | undefined = undefined;
 	static initialized: boolean = false;
+	static launched: boolean = false;
 	static plugin: Plugin;
 	static name: string;
 
@@ -31,6 +32,9 @@ export class CometState {
 		let endCalls = 0;
 		let windowsRemoved = 0;
 
+		// HACK: Janitor is cleaned up first in case of react tree.
+		this.janitor.Cleanup();
+
 		for (const system of this.systems) {
 			// Unload all systems
 			if (doesImplement<onEnd>(system, "onEnd")) {
@@ -41,12 +45,10 @@ export class CometState {
 
 		for (const [k, v] of this.windows) {
 			windowsRemoved++;
-			v.destroy();
+			v?.destroy();
 		}
 
 		if (this.debugEnabled)
 			this.log(print, `System deactivated. [${endCalls} closure(s), ${windowsRemoved} window(s) removed.]`);
-
-		this.janitor.Cleanup();
 	}
 }
