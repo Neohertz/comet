@@ -6,6 +6,7 @@ import { RunService, Workspace } from "@rbxts/services";
 import { SFX } from "./internal/sfx";
 import { State } from "./state";
 import { PluginStore } from "./datastore";
+import { Action } from "./internal/action";
 
 /**
  * Allows passing a class itself instead of an instance.
@@ -219,6 +220,18 @@ export class System {
 	 */
 	createButton(text: string, toolTip = "", image = "", toggleable = true, enabledWhenViewportHidden = false) {
 		return new Button(text, toolTip, image, toggleable, enabledWhenViewportHidden);
+	}
+
+	/**
+	 * Create an action that can be bound by the user.
+	 * @param name
+	 * @param statusTip
+	 * @param icon
+	 * @param allowBinding
+	 * @returns
+	 */
+	createAction(name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
+		return new Action(name, statusTip, icon, allowBinding);
 	}
 
 	/**

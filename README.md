@@ -6,5 +6,6 @@ A fast plugin framework inspired by Flamework.
 - Added `createCopy` paremeter to the `mount()` method overload that handles passing GuiBase objects.
 - `createButton()` now has an optional parameter to allow it to be used outside of the viewport (in script view).
 - Added `setEnabled()` to button class. 
+- Added support for actions with `createAction()`.
 
 [Docs](https://neohertz.dev/docs/comet/about)
