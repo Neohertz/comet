@@ -17,5 +17,6 @@
 	],
 	"rules": {
 		"prettier/prettier": "warn",
+		"prefer-const": "off",
 	},
 }

@@ -1,6 +1,6 @@
 import { HttpService } from "@rbxts/services";
 import { Button } from "./button";
-import { CometState } from "../state";
+import { State } from "../state";
 import { Networking } from "../networking";
 
 /**
@@ -24,13 +24,13 @@ export class View {
 	 */
 	constructor(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState);
 	constructor(name: string, size?: Vector2, maxSize?: Vector2, dockState = Enum.InitialDockState.Float) {
-		assert(!CometState.windows.has(name), "[Comet] Detected multiple windows with the same name.");
+		assert(!State.windows.has(name), "[Comet] Detected multiple windows with the same name.");
 
 		this.onCloseBind = Networking.Event();
 
 		// If both size and maxSize are given, we know we are creating a dock widget.
 		if (size && maxSize) {
-			this.container = CometState.plugin.CreateDockWidgetPluginGui(
+			this.container = State.plugin.CreateDockWidgetPluginGui(
 				HttpService.GenerateGUID(),
 				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, maxSize.X, maxSize.Y),
 			);
@@ -41,7 +41,7 @@ export class View {
 			this.container = new Instance("ScreenGui", game.GetService("CoreGui"));
 			this.container.IgnoreGuiInset = true;
 			this.container.Enabled = false;
-			CometState.janitor.Add(this.container);
+			State.maid.Add(this.container);
 		}
 	}
 
@@ -79,7 +79,7 @@ export class View {
 	}
 
 	/**
-	 * If the viewport is enabled, it will return its size.
+	 * Returns the viewport size, but only will only function as expected in viewport mode.
 	 * @returns Vector2
 	 */
 	getViewportSize(): Vector2 {
@@ -88,26 +88,27 @@ export class View {
 
 	/**
 	 * Mount a GuiBase instance to the window.
-	 *
-	 * Keep in mind that this method does not clone the instance.
+	 * The `createCopy` parameter defaults to false, but if true it will copy it before re-parenting.
 	 * @param element `GuiBase`
+	 * @param createCopy boolean
 	 * @returns element
 	 */
-	mount<T extends GuiBase>(element: T): T;
+	mount<T extends GuiBase>(element: T, createCopy?: boolean): T;
 	/**
 	 * Custom mounting method. Used to integrate ui-libraries like react and fusion.
 	 * @param method (root: Instance) => (() => void)
 	 */
 	mount<T extends GuiBase>(method: (root: Instance) => () => void): void;
-	mount<T extends GuiBase>(element: T | ((root: Instance) => () => void)) {
+	mount<T extends GuiBase>(element: T | ((root: Instance) => () => void), createCopy = false) {
 		assert(this.container, "Container instance is nill. This is most likely a bug.");
 
 		if (typeIs(element, "function")) {
 			const cb = element(this.container);
-			CometState.janitor.Add(cb, true);
+			State.maid.Add(cb, true);
 		} else {
+			if (createCopy) element = element.Clone();
 			(element as GuiBase).Parent = this.container;
-			CometState.janitor.Add(element);
+			State.maid.Add(element);
 			return element;
 		}
 	}

@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"@rbxts/janitor": "^1.15.7-ts.0",
-		"@rbxts/services": "^1.5.4"
+		"@rbxts/services": "^1.5.4",
+		"@rbxts/sift": "^0.0.9"
 	}
 }

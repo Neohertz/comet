@@ -1,6 +1,6 @@
 import { ContentProvider } from "@rbxts/services";
 import { View } from "./view";
-import { CometState } from "../state";
+import { State } from "../state";
 
 export class SFX {
 	// HACK: roblox requires sounds to be within a widget in edit mode.
@@ -33,7 +33,7 @@ export class SFX {
 		sound = new Instance("Sound", SFX.soundWidget.container);
 		sound.SoundId = soundId;
 		sound.Looped = looped;
-		CometState.janitor.Add(sound);
+		State.maid.Add(sound);
 		this.soundMap.set(soundId, sound);
 
 		ContentProvider.PreloadAsync([sound]);

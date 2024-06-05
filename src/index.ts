@@ -1,5 +1,5 @@
-import { Button } from "./comet/tools/button";
-import { View } from "./comet/tools/view";
+import { Button } from "./comet/internal/button";
+import { View } from "./comet/internal/view";
 
 export { System, Comet, onInit, onStart, onRender, onEnd } from "./comet";
 export { Networking } from "./comet/networking";

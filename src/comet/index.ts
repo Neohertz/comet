@@ -1,10 +1,11 @@
-import { View } from "./tools/view";
-import { Menu } from "./tools/menu";
-import { Button } from "./tools/button";
+import { View } from "./internal/view";
+import { Menu } from "./internal/menu";
+import { Button } from "./internal/button";
 import { doesImplement } from "./types/guards";
 import { RunService, Workspace } from "@rbxts/services";
-import { SFX } from "./tools/sfx";
-import { CometState } from "./state";
+import { SFX } from "./internal/sfx";
+import { State } from "./state";
+import { PluginStore } from "./datastore";
 
 /**
  * Allows passing a class itself instead of an instance.
@@ -24,12 +25,42 @@ export namespace Comet {
 	 * @param name
 	 */
 	export function createApp(plugin: Plugin, name: string) {
-		assert(!CometState.initialized, "[Comet] App was initialized twice.");
+		assert(!State.initialized, "[Comet] App was initialized twice.");
 		assert(plugin, "[Comet] Plugin reference passed within createApp() is undefined!");
-		CometState.plugin = plugin;
-		CometState.initialized = true;
-		CometState.name = name;
-		CometState.plugin.Unloading.Connect(() => CometState.unload());
+		State.plugin = plugin;
+
+		State.initialized = true;
+		State.name = name;
+		State.plugin.Unloading.Connect(() => {
+			let endCalls = 0;
+			let windowsRemoved = 0;
+
+			// HACK: Janitor is cleaned up first in case of react tree.
+			State.maid.Cleanup();
+
+			for (const system of State.systems) {
+				// Unload all systems
+				if (doesImplement<onEnd>(system, "onEnd")) {
+					endCalls++;
+					system.onEnd();
+				}
+			}
+
+			for (const [k, v] of State.windows) {
+				windowsRemoved++;
+				v?.destroy();
+			}
+
+			if (State.debugEnabled)
+				State.log(print, `System deactivated. [${endCalls} closure(s), ${windowsRemoved} window(s) removed.]`);
+		});
+	}
+
+	export function useDatastore<T extends object>(defaultData: T) {
+		assert(State.plugin, "[Comet] `createApp` must be called before 'useDatastore()'");
+		const ds = new PluginStore(State.plugin, {
+			hello: "World!",
+		});
 	}
 
 	/**
@@ -37,11 +68,11 @@ export namespace Comet {
 	 * @param system
 	 */
 	export function registerSystem(system: ClassRef<System>) {
-		assert(CometState.initialized, "[Comet] Attempted to add system before initializing app.");
-		assert(!CometState.launched, "[Comet] Attempted to register system after calling launch().");
+		assert(State.initialized, "[Comet] Attempted to add system before initializing app.");
+		assert(!State.launched, "[Comet] Attempted to register system after calling launch().");
 
 		const newSystem = new system();
-		CometState.systems.set(tostring(system), newSystem);
+		State.systems.set(tostring(system), newSystem);
 	}
 
 	/**
@@ -63,26 +94,26 @@ export namespace Comet {
 	 * @returns
 	 */
 	export function launch() {
-		assert(CometState.initialized, "[Comet] Attempted to launch before initializing app.");
-		if (CometState.systems.size() === 0) CometState.log(warn, "No systems have been registered.");
+		assert(State.initialized, "[Comet] Attempted to launch before initializing app.");
+		if (State.systems.size() === 0) State.log(warn, "No systems have been registered.");
 
-		CometState.launched = true;
+		State.launched = true;
 
-		if (!CometState.runInPlaytestEnabled && RunService.IsRunning()) return;
+		if (!State.runInPlaytestEnabled && RunService.IsRunning()) return;
 
-		if (CometState.debugEnabled) {
-			CometState.log(warn, "Debugging Enabled");
-			CometState.log(print, `${CometState.systems.size()} systems registered.`);
+		if (State.debugEnabled) {
+			State.log(warn, "Debugging Enabled");
+			State.log(print, `${State.systems.size()} systems registered.`);
 		}
 
 		// Initialize Systems
-		for (const [key, system] of CometState.systems) {
+		for (const [_, system] of State.systems) {
 			if (doesImplement<onInit>(system, "onInit")) {
 				system.onInit();
 			}
 		}
 
-		for (const [key, system] of CometState.systems) {
+		for (const [_, system] of State.systems) {
 			// Start Systems
 			if (doesImplement<onStart>(system, "onStart")) {
 				task.spawn(() => system.onStart());
@@ -90,11 +121,7 @@ export namespace Comet {
 
 			// Bind system to render stepped.
 			if (doesImplement<onRender>(system, "onRender")) {
-				CometState.janitor.Add(
-					RunService.RenderStepped.Connect((dt) => {
-						system.onRender(dt);
-					}),
-				);
+				State.maid.Add(RunService.RenderStepped.Connect((dt) => system.onRender(dt)));
 			}
 		}
 	}
@@ -103,7 +130,7 @@ export namespace Comet {
 	 * Enable verbose debugging.
 	 */
 	export function enableDebugging() {
-		CometState.debugEnabled = true;
+		State.debugEnabled = true;
 	}
 }
 
@@ -118,10 +145,10 @@ export class System {
 
 	constructor() {
 		this.sfxManager = new SFX();
-		this.plugin = CometState.plugin;
+		this.plugin = State.plugin;
 
 		this.historyService = game.GetService("ChangeHistoryService");
-		CometState.janitor.Add(this.historyService.OnRecordingStarted.Connect((name) => (this.lastRecording = name)));
+		State.maid.Add(this.historyService.OnRecordingStarted.Connect((name) => (this.lastRecording = name)));
 	}
 
 	/**
@@ -129,7 +156,7 @@ export class System {
 	 * @returns Janitor
 	 */
 	getJanitor() {
-		return CometState.janitor;
+		return State.maid;
 	}
 
 	/**
@@ -141,7 +168,7 @@ export class System {
 	 * @returns T
 	 */
 	use<T extends System>(base: ClassRef<T>): Omit<T, keyof System> {
-		const classRef = CometState.systems.get(tostring(base));
+		const classRef = State.systems.get(tostring(base));
 
 		assert(
 			classRef,
@@ -187,10 +214,11 @@ export class System {
 	 * @param toolTip string
 	 * @param image string
 	 * @param toggleable bool? = true
+	 * @param enabledWhenViewportHidden bool? = false
 	 * @returns
 	 */
-	createButton(text: string, toolTip = "", image = "", toggleable = true) {
-		return new Button(text, toolTip, image, toggleable);
+	createButton(text: string, toolTip = "", image = "", toggleable = true, enabledWhenViewportHidden = false) {
+		return new Button(text, toolTip, image, toggleable, enabledWhenViewportHidden);
 	}
 
 	/**
@@ -199,7 +227,7 @@ export class System {
 	 */
 	createOverlay(name: string): View {
 		const window = new View(name);
-		CometState.windows.set(name, window);
+		State.windows.set(name, window);
 		return window;
 	}
 
@@ -212,7 +240,7 @@ export class System {
 	 */
 	createWidget(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState): View {
 		const window = new View(name, size, maxSize, dockState);
-		CometState.windows.set(name, window);
+		State.windows.set(name, window);
 		return window;
 	}
 
@@ -233,11 +261,19 @@ export class System {
 	 * @returns object
 	 */
 	record(name: string, description?: string) {
-		const recording = this.historyService.TryBeginRecording(name, description);
-		assert(
-			recording,
-			`[Comet] Multiple Recordings: Attempted to start recording '${name}' but failed as recording '${this.lastRecording}' was never concluded.`,
-		);
+		let recording = this.historyService.TryBeginRecording(name, description);
+
+		if (recording === undefined) {
+			State.log(
+				warn,
+				`Recording '${this.lastRecording}' has been canceled because a new one was started. Refactor your code to ensure the recording is always handled properly.`,
+			);
+			this.historyService.FinishRecording("", Enum.FinishRecordingOperation.Cancel, undefined);
+			this.lastRecording = undefined;
+			recording = this.historyService.TryBeginRecording(name, description);
+		}
+
+		this.lastRecording = recording;
 
 		// NOTE: returning an object here as a class would be a bit unnecessary. This may change as it's not very uniform.
 		return {
@@ -246,7 +282,7 @@ export class System {
 			 * @param options
 			 */
 			commit: (options?: object) => {
-				this.historyService.FinishRecording(recording, Enum.FinishRecordingOperation.Commit, options);
+				this.historyService.FinishRecording(recording!, Enum.FinishRecordingOperation.Commit, options);
 			},
 
 			/**
@@ -254,7 +290,7 @@ export class System {
 			 * @param options
 			 */
 			append: (options?: object) => {
-				this.historyService.FinishRecording(recording, Enum.FinishRecordingOperation.Append, options);
+				this.historyService.FinishRecording(recording!, Enum.FinishRecordingOperation.Append, options);
 			},
 
 			/**
@@ -262,7 +298,7 @@ export class System {
 			 * @param options
 			 */
 			cancel: (options?: object) => {
-				this.historyService.FinishRecording(recording, Enum.FinishRecordingOperation.Cancel, options);
+				this.historyService.FinishRecording(recording!, Enum.FinishRecordingOperation.Cancel, options);
 			},
 		};
 	}
