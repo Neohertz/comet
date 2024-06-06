@@ -1,4 +1,3 @@
-import { HttpService } from "@rbxts/services";
 import { State } from "../state";
 
 /**
@@ -7,8 +6,8 @@ import { State } from "../state";
 export class Action {
 	private action: PluginAction;
 
-	constructor(name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
-		this.action = State.plugin.CreatePluginAction(HttpService.GenerateGUID(), name, statusTip, icon, allowBinding);
+	constructor(id: string, name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
+		this.action = State.plugin.CreatePluginAction(id, name, statusTip, icon, allowBinding);
 		State.maid.Add(() => this.cleanup());
 	}
 
@@ -16,6 +15,10 @@ export class Action {
 		this.action.Destroy();
 	}
 
+	/**
+	 * Add a callback for when the action is triggered.
+	 * @param cb
+	 */
 	onTrigger(cb: () => void) {
 		State.maid.Add(this.action.Triggered.Connect(cb));
 	}

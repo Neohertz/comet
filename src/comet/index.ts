@@ -57,11 +57,14 @@ export namespace Comet {
 		});
 	}
 
+	/**
+	 * Currently testing. Not for use in production
+	 * @param defaultData
+	 * @deprecated
+	 */
 	export function useDatastore<T extends object>(defaultData: T) {
 		assert(State.plugin, "[Comet] `createApp` must be called before 'useDatastore()'");
-		const ds = new PluginStore(State.plugin, {
-			hello: "World!",
-		});
+		return new PluginStore(State.plugin, defaultData);
 	}
 
 	/**
@@ -74,20 +77,6 @@ export namespace Comet {
 
 		const newSystem = new system();
 		State.systems.set(tostring(system), newSystem);
-	}
-
-	/**
-	 * Currently testing. Not for use.
-	 * @param system
-	 * @deprecated
-	 */
-	export function registerSystemFolder(system: Folder) {
-		for (const inst of system.GetChildren()) {
-			assert(inst.IsA("ModuleScript"), `[Comet] "system" ${inst.Name} isn't a module.`);
-			assert(inst.Source.find("System"), `[Comet] system ${inst.Name} is not a valid system.`);
-			const req = require(inst) as ClassRef<System>;
-			registerSystem(req);
-		}
 	}
 
 	/**
@@ -230,8 +219,8 @@ export class System {
 	 * @param allowBinding
 	 * @returns
 	 */
-	createAction(name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
-		return new Action(name, statusTip, icon, allowBinding);
+	createAction(id: string, name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
+		return new Action(id, name, statusTip, icon, allowBinding);
 	}
 
 	/**
@@ -331,6 +320,17 @@ export class System {
 	 */
 	select(obj?: Instance | Instance[]) {
 		game.GetService("Selection").Set(obj ? (typeIs(obj, "table") ? (obj as Instance[]) : [obj]) : []);
+	}
+
+	/**
+	 * Bind a callback to selection changes.
+	 */
+	onSelectionChanged(cb: (sel: Instance[]) => void) {
+		State.maid.Add(
+			game.GetService("Selection").SelectionChanged.Connect(() => {
+				cb(this.getSelection());
+			}),
+		);
 	}
 }
 

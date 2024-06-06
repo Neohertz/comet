@@ -18,7 +18,7 @@ export class PluginStore<T extends object> {
 		const sessionLocked = (plugin.GetSetting(SL_KEY) as boolean | undefined) ?? false;
 
 		if (sessionLocked) {
-			warn("[Comet] [DS] Existing session detected. Data will not be availible.");
+			warn("[Comet] [Data] Existing session detected. Data will not be availible.");
 		} else {
 			plugin.SetSetting(SL_KEY, true);
 
@@ -32,10 +32,16 @@ export class PluginStore<T extends object> {
 		}
 	}
 
+	/**
+	 * Force plugin to save the current state.
+	 */
 	forceSave() {
 		this.plugin.SetSetting(DS_KEY, this.state);
 	}
 
+	/**
+	 * Close the plugin state.
+	 */
 	close() {
 		this.plugin.SetSetting(DS_KEY, this.state);
 		this.plugin.SetSetting(SL_KEY, false);
