@@ -1,6 +1,9 @@
 # comet.ts
 A fast plugin framework inspired by Flamework.
 
+## v1.1.1
+- Bug fixes and type exports.
+
 ## v1.1.0
 - Added `record()` member that abstracts undo/redo.
 - Added `createCopy` parameter to the `mount()` method overload that handles passing GuiBase objects.

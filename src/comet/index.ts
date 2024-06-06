@@ -39,7 +39,7 @@ export namespace Comet {
 			// HACK: Janitor is cleaned up first in case of react tree.
 			State.maid.Cleanup();
 
-			for (const system of State.systems) {
+			for (const [_, system] of State.systems) {
 				// Unload all systems
 				if (doesImplement<onEnd>(system, "onEnd")) {
 					endCalls++;
@@ -237,11 +237,11 @@ export class System {
 	 * Create and returns a view that is mounted within a dockable widget.
 	 * @param name string
 	 * @param size Vector2
-	 * @param maxSize Vector2
+	 * @param minSize Vector2
 	 * @param dockState Enum.InitialDockState?
 	 */
-	createWidget(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState): View {
-		const window = new View(name, size, maxSize, dockState);
+	createWidget(name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState): View {
+		const window = new View(name, size, minSize, dockState);
 		State.windows.set(name, window);
 		return window;
 	}

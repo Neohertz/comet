@@ -20,19 +20,19 @@ export class View {
 	 * Create a window that renders in a widget.
 	 * @param name
 	 * @param size
-	 * @param maxSize
+	 * @param minSize
 	 */
-	constructor(name: string, size: Vector2, maxSize: Vector2, dockState?: Enum.InitialDockState);
-	constructor(name: string, size?: Vector2, maxSize?: Vector2, dockState = Enum.InitialDockState.Float) {
+	constructor(name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState);
+	constructor(name: string, size?: Vector2, minSize?: Vector2, dockState = Enum.InitialDockState.Float) {
 		assert(!State.windows.has(name), "[Comet] Detected multiple windows with the same name.");
 
 		this.onCloseBind = Networking.Event();
 
 		// If both size and maxSize are given, we know we are creating a dock widget.
-		if (size && maxSize) {
+		if (size && minSize) {
 			this.container = State.plugin.CreateDockWidgetPluginGui(
 				HttpService.GenerateGUID(),
-				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, maxSize.X, maxSize.Y),
+				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, minSize.X, minSize.Y),
 			);
 
 			(this.container as DockWidgetPluginGui).Title = name;
