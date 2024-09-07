@@ -8,7 +8,7 @@ export namespace Networking {
 
 	export interface Function<T extends unknown[], R> {
 		invoke: (...args: T) => Promise<R>;
-		callback: (cb: (...args: T) => Promise<R>) => void;
+		callback: (cb: (...args: T) => R) => void;
 	}
 
 	export function Event<T extends Array<unknown> = []>(): Event<T> {
@@ -31,7 +31,7 @@ export namespace Networking {
 
 		return {
 			invoke: async (...args: T) => {
-				return (await func.Invoke(...args)) as R;
+				return func.Invoke(...args) as R;
 			},
 			callback: (cb: (...args: T) => void) => {
 				func.OnInvoke = cb;
