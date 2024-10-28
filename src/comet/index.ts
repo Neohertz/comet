@@ -25,10 +25,11 @@ export namespace Comet {
 	 * @param plugin
 	 * @param name
 	 */
-	export function createApp(plugin: Plugin, name: string) {
+	export function createApp(plugin: Plugin, name: string, runInPlaytest = false) {
 		assert(!State.initialized, "[Comet] App was initialized twice.");
 		assert(plugin, "[Comet] Plugin reference passed within createApp() is undefined!");
 		State.plugin = plugin;
+		State.runInPlaytestEnabled = runInPlaytest;
 
 		State.initialized = true;
 		State.name = name;
