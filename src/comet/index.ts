@@ -2,7 +2,7 @@ import { View } from "./internal/view";
 import { Menu } from "./internal/menu";
 import { Button } from "./internal/button";
 import { doesImplement } from "./types/guards";
-import { RunService, Workspace } from "@rbxts/services";
+import { RunService } from "@rbxts/services";
 import { SFX } from "./internal/sfx";
 import { State } from "./state";
 import { PluginStore } from "./datastore";
@@ -42,7 +42,7 @@ export namespace Comet {
 
 			for (const [_, system] of State.systems) {
 				// Unload all systems
-				if (doesImplement<onEnd>(system, "onEnd")) {
+				if (doesImplement<OnEnd>(system, "onEnd")) {
 					endCalls++;
 					system.onEnd();
 				}
@@ -99,19 +99,19 @@ export namespace Comet {
 
 		// Initialize Systems
 		for (const [_, system] of State.systems) {
-			if (doesImplement<onInit>(system, "onInit")) {
+			if (doesImplement<OnInit>(system, "onInit")) {
 				system.onInit();
 			}
 		}
 
 		for (const [_, system] of State.systems) {
 			// Start Systems
-			if (doesImplement<onStart>(system, "onStart")) {
+			if (doesImplement<OnStart>(system, "onStart")) {
 				task.spawn(() => system.onStart());
 			}
 
 			// Bind system to render stepped.
-			if (doesImplement<onRender>(system, "onRender")) {
+			if (doesImplement<OnRender>(system, "onRender")) {
 				State.maid.Add(RunService.RenderStepped.Connect((dt) => system.onRender(dt)));
 			}
 		}
@@ -129,7 +129,7 @@ export class System {
 	/**
 	 * A reference to plugin is supplied for extraordinary usage.
 	 */
-	readonly plugin: Plugin;
+	public readonly plugin: Plugin;
 	private sfxManager: SFX;
 	private lastRecording: string | undefined;
 	private historyService: ChangeHistoryService;
@@ -146,7 +146,7 @@ export class System {
 	 * Use the janitor.
 	 * @returns Janitor
 	 */
-	getJanitor() {
+	protected getJanitor() {
 		return State.maid;
 	}
 
@@ -158,7 +158,7 @@ export class System {
 	 * @param base ctor
 	 * @returns T
 	 */
-	use<T extends System>(base: ClassRef<T>): Omit<T, keyof System> {
+	protected use<T extends System>(base: ClassRef<T>): T {
 		const classRef = State.systems.get(tostring(base));
 
 		assert(
@@ -175,7 +175,7 @@ export class System {
 	 * @param soundId string
 	 * @param looped bool? (false)
 	 */
-	playSFX(soundId: string | number, looped = false) {
+	protected playSFX(soundId: string | number, looped = false) {
 		this.sfxManager.playSound(soundId, looped);
 	}
 
@@ -195,7 +195,7 @@ export class System {
 	 * @param icon
 	 * @returns
 	 */
-	buildMenu() {
+	protected buildMenu() {
 		return new Menu();
 	}
 
@@ -208,7 +208,13 @@ export class System {
 	 * @param enabledWhenViewportHidden bool? = false
 	 * @returns
 	 */
-	createButton(text: string, toolTip = "", image = "", toggleable = true, enabledWhenViewportHidden = false) {
+	protected createButton(
+		text: string,
+		toolTip = "",
+		image = "",
+		toggleable = true,
+		enabledWhenViewportHidden = false,
+	) {
 		return new Button(text, toolTip, image, toggleable, enabledWhenViewportHidden);
 	}
 
@@ -220,7 +226,7 @@ export class System {
 	 * @param allowBinding
 	 * @returns
 	 */
-	createAction(id: string, name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
+	protected createAction(id: string, name: string, statusTip: string, icon?: string, allowBinding?: boolean) {
 		return new Action(id, name, statusTip, icon, allowBinding);
 	}
 
@@ -228,7 +234,7 @@ export class System {
 	 * Creates and returns a view that is mounted within the viewport.
 	 * @param name
 	 */
-	createOverlay(name: string): View {
+	protected createOverlay(name: string): View {
 		const window = new View(name);
 		State.windows.set(name, window);
 		return window;
@@ -241,7 +247,7 @@ export class System {
 	 * @param minSize Vector2
 	 * @param dockState Enum.InitialDockState?
 	 */
-	createWidget(name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState): View {
+	protected createWidget(name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState): View {
 		const window = new View(name, size, minSize, dockState);
 		State.windows.set(name, window);
 		return window;
@@ -263,7 +269,7 @@ export class System {
 	 * @param description
 	 * @returns object
 	 */
-	record(name: string, description?: string) {
+	protected record(name: string, description?: string) {
 		let recording = this.historyService.TryBeginRecording(name, description);
 
 		if (recording === undefined) {
@@ -310,7 +316,7 @@ export class System {
 	 * Returns an array of the currently selected items.
 	 * @returns
 	 */
-	getSelection(): Instance[] {
+	protected getSelection(): Instance[] {
 		return game.GetService("Selection").Get();
 	}
 
@@ -319,14 +325,14 @@ export class System {
 	 * If no items are supplied to this function, it will deselect all
 	 * @param obj? Instance | Instance[]
 	 */
-	select(obj?: Instance | Instance[]) {
+	protected select(obj?: Instance | Instance[]) {
 		game.GetService("Selection").Set(obj ? (typeIs(obj, "table") ? (obj as Instance[]) : [obj]) : []);
 	}
 
 	/**
 	 * Bind a callback to selection changes.
 	 */
-	onSelectionChanged(cb: (sel: Instance[]) => void) {
+	protected onSelectionChanged(cb: (sel: Instance[]) => void) {
 		State.maid.Add(
 			game.GetService("Selection").SelectionChanged.Connect(() => {
 				cb(this.getSelection());
@@ -339,33 +345,42 @@ export class System {
  * | Lifecycle Methods
  */
 
-export interface onInit {
+export interface OnInit {
 	/**
 	 * Called synchronously when the system starts.
+	 * @returns void
+	 *
+	 * @hidden
 	 */
 	onInit(): void;
 }
 
-export interface onStart {
+export interface OnStart {
 	/**
 	 * Called asynchronously after the system initializes.
+	 * @returns void
+	 *
+	 * @hidden
 	 */
 	onStart(): void | Promise<void>;
 }
 
-export interface onEnd {
+export interface OnEnd {
 	/**
 	 * Called when the plugin is unloaded.
 	 * @returns void
+	 *
+	 * @hidden
 	 */
 	onEnd(): void;
 }
 
-export interface onRender {
+export interface OnRender {
 	/**
 	 * Called each frame using `RenderStepped`.
+	 * @returns void
 	 *
-	 * @hideInherited
+	 * @hidden
 	 */
 	onRender(dt: number): void;
 }
