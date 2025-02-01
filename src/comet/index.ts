@@ -143,11 +143,13 @@ export class System {
 	}
 
 	/**
-	 * Use the janitor.
-	 * @returns Janitor
+	 * Hand an object or conntion to comet. This object will be automatically cleaned up when the plugin unloads.
+	 * @returns RBXScriptConnection
 	 */
-	protected getJanitor() {
-		return State.maid;
+	public track<T extends Instance | RBXScriptConnection>(connection: T): T {
+		if (typeIs(connection, "Instance")) State.maid.Add(connection as Instance, "Destroy");
+		else State.maid.Add(connection);
+		return connection;
 	}
 
 	/**
