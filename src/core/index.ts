@@ -72,7 +72,7 @@ export namespace Comet {
 		plugin.Unloading.Once(() => {
 			state.tracker.clean();
 
-			for (const [name, system] of state.registry) {
+			for (const [_, system] of state.registry) {
 				if (doesImplement<OnEnd>(system, "onEnd")) {
 					system.onEnd();
 				}
@@ -80,6 +80,10 @@ export namespace Comet {
 		});
 	}
 
+	/**
+	 * Register systems within a parent instance. Searches recursively.
+	 * @param path
+	 */
 	export function addPaths(path: unknown) {
 		assert(state.appPlugin, "You must create the app first.");
 		const tsImpl = (_G as Map<unknown, unknown>).get(script);
@@ -90,13 +94,16 @@ export namespace Comet {
 			? (module: unknown) => tsImpl.import(script, module)
 			: require;
 
-		for (const obj of (path as Instance).GetChildren()) {
+		for (const obj of (path as Instance).GetDescendants()) {
 			if (obj.IsA("ModuleScript")) {
 				loadModule(obj);
 			}
 		}
 	}
 
+	/**
+	 * Launch comet. Initialize all systems and dependencies, and launch any lifecycle methods.
+	 */
 	export function launch() {
 		assert(state.appPlugin, "You must create the app first.");
 		state.logger.warn("----- INITIALIZING ------");
