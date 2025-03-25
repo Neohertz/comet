@@ -42,7 +42,5 @@
 		"roblox-ts": "^2.3.0",
 		"typescript": "^5.4.5"
 	},
-	"dependencies": {
-		"@rbxts/t": "^3.2.1"
-	}
+	"dependencies": {}
 }

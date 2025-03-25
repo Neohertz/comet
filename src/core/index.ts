@@ -1,4 +1,3 @@
-import { t } from "@rbxts/t";
 import { doesImplement } from "../types/guard";
 import { OnInit, OnRender, OnStart, OnHeartbeat, OnEnd } from "../types/lifecycle";
 import { Log } from "../util/log";
@@ -86,12 +85,12 @@ export namespace Comet {
 	 */
 	export function addPaths(path: unknown) {
 		assert(state.appPlugin, "You must create the app first.");
-		const tsImpl = (_G as Map<unknown, unknown>).get(script);
+		const tsImpl = (_G as Map<unknown, unknown>).get(script) as object;
 
-		const loadModule = t.interface({
-			import: t.callback,
-		})(tsImpl)
-			? (module: unknown) => tsImpl.import(script, module)
+		const loadModule = doesImplement<{
+			import: (a: LuaSourceContainer, b: LuaSourceContainer) => void;
+		}>(tsImpl, "import")
+			? (obj: ModuleScript) => tsImpl.import(script, obj)
 			: require;
 
 		for (const obj of (path as Instance).GetDescendants()) {
