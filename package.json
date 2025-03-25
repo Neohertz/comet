@@ -19,6 +19,7 @@
 		"comet",
 		"plugin"
 	],
+	"exports": "./src/index.ts",
 	"author": "Neohertz",
 	"license": "ISC",
 	"types": "out/index.d.ts",
