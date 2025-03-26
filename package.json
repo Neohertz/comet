@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/comet",
-	"version": "2.0.0-rc.1",
+	"version": "2.0.0-beta.0",
 	"description": "A fast framework for plugin development inspired by flamework.",
 	"repository": {
 		"type": "git",
@@ -8,6 +8,7 @@
 	},
 	"homepage": "https://neohertz.dev/docs/comet/about",
 	"main": "out/init.lua",
+	"types": "out/index.d.ts",
 	"scripts": {
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w",
@@ -19,10 +20,8 @@
 		"comet",
 		"plugin"
 	],
-	"exports": "./src/index.ts",
 	"author": "Neohertz",
 	"license": "ISC",
-	"types": "out/index.d.ts",
 	"files": [
 		"out",
 		"!**/*.tsbuildinfo"
