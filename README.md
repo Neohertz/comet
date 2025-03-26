@@ -1,49 +1,69 @@
-# Comet
+# Comet v2.0
 
 A fast plugin framework inspired by flamework.
 
 ## Example Usage:
 
 ```ts
-// main-system.ts
-import { CometView, System, onInit } from "@rbxts/comet";
+// src/systems/main-system.ts
+import {
+  CometButton,
+  Dependency,
+  Library,
+  OnEnd,
+  OnInit,
+  System,
+} from "@rbxts/comet";
+import { ServerStorage } from "@rbxts/services";
 
-export class MainSystem extends System implements onInit {
-	public button: CometButton;
-	public widget: CometView;
+@System()
+export class MySystem implements OnInit, OnEnd {
+  public noteButton: CometButton;
 
-	constructor() {
-		super();
+  constructor(
+    private gui = Dependency(Library.GUI),
+    private meta = Dependency(Library.Meta),
+    private objects = Dependency(Library.Objects)
+  ) {
+    this.noteButton = gui.createButton(
+      "Create Note",
+      "",
+      "rbxassetid://7414445494",
+      false,
+      true
+    );
+  }
 
-		// Create both a tool bar button and widget.
-		this.button = this.createButton("Toggle Plugin");
-		this.widget = this.createWidget("My Awesome App", new Vector2(300, 800), Vector.zero);
+  public writeNote() {
+    const newScript = new Instance("Script", ServerStorage);
+    newScript.Name = "Note";
+    this.objects.track(newScript); // Clean it up on unload.
 
-		// Quickly link a button's state to a view's visibility.
-		this.widget.linkButton(this.button);
-	}
+    // Get the plugin reference at any time.
+    const plugin = this.meta.getPlugin();
+    plugin.OpenScript(newScript);
+  }
 
-	public onInit(): void {
-		// Easily mount your react tree.
-		this.widget.mount((root) => SomeReactEntrypoint(root));
-	}
+  onInit() {
+    // Do something when the button is
+    this.noteButton.onPress(() => {
+      this.writeNote();
+    });
+  }
+
+  onEnd(): void {
+    print("Plugin unloaded.");
+  }
 }
 ```
 
 ```ts
-// runtime.server.ts
+// src/init.server.ts
 import { Comet } from "@rbxts/comet";
-import { MainSystem } from "./main-system.ts";
 
-Comet.createApp(plugin, "My awesome plugin!", false);
-Comet.registerSystem(MainSystem);
+Comet.createApp("My awesome plugin!");
+Comet.addPaths(script.Parent.Systems);
 Comet.launch();
 ```
 
 To learn more, visit the [Docs](https://neohertz.dev/docs/comet/about)
-
-## Patch v1.0.5
-
--   Implemented `.track()` method to easily pass `RBXScriptConnections` and `Instances` to comet's internal maid.
-    -   These instances will be automatically cleaned up when the plugin unloads.
--   Remove `.getJanitor()` method.
