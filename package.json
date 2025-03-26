@@ -43,5 +43,7 @@
 		"roblox-ts": "^2.3.0",
 		"typescript": "^5.4.5"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"@rbxts/lemon-signal": "^1.2.0"
+	}
 }
