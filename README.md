@@ -1,9 +1,17 @@
 # Comet v2.0
 
-A fast plugin framework inspired by flamework.
+A modular, singleton based framework for building plugins for Roblox Studio.
+
+## What's new in v2.0?
+Comet has been rewritten from scratch to improve the developer experience.
+
+- Proper dependencies and load order resolution.
+- Utilities are now modules. No more messy classes.
+- Added `onHeartbeat` lifecycle method.
+- Systems are declared via `@System` decorator.
 
 ## Example Usage:
-
+A simple plugin that allows you to create a note by clicking the ribbon button.
 ```ts
 // src/systems/main-system.ts
 import {
@@ -23,14 +31,14 @@ export class MySystem implements OnInit, OnEnd {
   constructor(
     private gui = Dependency(Library.GUI),
     private meta = Dependency(Library.Meta),
-    private objects = Dependency(Library.Objects)
+    private objects = Dependency(Library.Objects),
   ) {
     this.noteButton = gui.createButton(
       "Create Note",
       "",
       "rbxassetid://7414445494",
       false,
-      true
+      true,
     );
   }
 
