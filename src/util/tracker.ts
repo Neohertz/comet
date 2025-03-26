@@ -1,4 +1,4 @@
-type TrackableObject = Instance | RBXScriptConnection | thread;
+type TrackableObject = Instance | RBXScriptConnection | thread | Callback;
 
 export class Tracker {
 	private store = new Array<TrackableObject>();
@@ -15,6 +15,8 @@ export class Tracker {
 				obj.Disconnect();
 			} else if (typeIs(obj, "thread")) {
 				task.cancel(obj);
+			} else if (typeIs(obj, "function")) {
+				obj();
 			}
 		}
 	}
