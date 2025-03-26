@@ -8,7 +8,7 @@
 		"project": "./tsconfig.json",
 	},
 	"ignorePatterns": ["/out"],
-	"plugins": ["@typescript-eslint", "roblox-ts", "prettier"],
+	"plugins": ["@typescript-eslint", "unused-imports", "roblox-ts", "prettier"],
 	"extends": [
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
@@ -17,6 +17,7 @@
 	],
 	"rules": {
 		"prettier/prettier": "warn",
+		"unused-imports/no-unused-imports": "error",
 		"prefer-const": "off",
 	},
 }
