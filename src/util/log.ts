@@ -1,9 +1,7 @@
-export class Log {
+class Logger {
 	warn(message: string) {
 		warn(`[Comet] ${message}`);
 	}
-
-	asrt<T>(condition: T, message: string): asserts condition {
-		assert(condition, `[Comet] ${message}`);
-	}
 }
+
+export const Log = new Logger();

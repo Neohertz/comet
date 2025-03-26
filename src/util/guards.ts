@@ -1,5 +1,5 @@
 /**
- * Deturmines if a class does implement a method.
+ * Determines if a class does implement a method.
  * @param object
  * @param member
  */
