@@ -2,16 +2,18 @@ import { doesImplement } from "../util/guards";
 import { OnEnd } from "../types/lifecycle";
 import { CometState } from "../types/comet";
 import { Tracker } from "../util/tracker";
-import { launchSystems, registerSystem, SystemBase } from "./system";
+import { launchSystems, registerSystem } from "./system";
 import { ClassRef, SystemConfig } from "../types/comet";
 import { registerDependency } from "./dependency";
 import { addSystemPath } from "./paths";
 
 const state: CometState = {
-	registry: new Map<string, SystemBase>(),
-	dependencies: new Array<string>(),
-	initialized: new Set<string>(),
+	dependencies: new Array(),
+	initialized: new Set(),
 	depTarget: undefined,
+	registry: new Map(),
+	internal: new Set(),
+	lazy: new Set(),
 
 	toolbar: undefined,
 	windows: new Map(),
@@ -68,7 +70,7 @@ export namespace Comet {
  * @param config
  * @returns
  */
-export function System(config?: SystemConfig) {
+export function System(config: SystemConfig = {}) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return function (ctor: any) {
 		registerSystem(state, ctor, false, config);
@@ -80,7 +82,7 @@ export function System(config?: SystemConfig) {
  * @param config
  * @returns
  */
-export function InternalSystem(config?: SystemConfig) {
+export function InternalSystem(config: SystemConfig = {}) {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return function (ctor: any) {
 		registerSystem(state, ctor, true, config);

@@ -12,13 +12,20 @@ export interface ClassRef<T> {
 }
 
 export interface SystemConfig {
-	loadOrder?: number;
+	/**
+	 * Prevent the module from initializing unless it's depended upon.
+	 *
+	 * Mostly used internally.
+	 */
+	lazy?: boolean;
 }
 
 export interface CometState {
 	registry: Map<string, SystemBase>;
 	dependencies: Array<string>;
 	initialized: Set<string>;
+	internal: Set<string>;
+	lazy: Set<string>;
 	depTarget: string | undefined;
 
 	toolbar: PluginToolbar | undefined;

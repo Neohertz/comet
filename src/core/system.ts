@@ -17,12 +17,21 @@ export type SystemBase = any;
 export function registerSystem(
 	state: CometState,
 	ctor: { new (...args: unknown[]): {} },
-	internal?: boolean,
-	config?: SystemConfig
+	internal: boolean,
+	config: SystemConfig
 ): SystemBase {
 	const name = tostring(ctor);
 
-	if (!internal) {
+	// If the module is an internal one, it should always be lazy.
+	if (internal) {
+		state.internal.add(name);
+		config.lazy = true;
+	}
+
+	// If the module is lazy, let the dependency method handle the initialization.
+	if (config.lazy) {
+		state.lazy.add(name);
+	} else {
 		state.depTarget = name;
 		const result = internal ? new ctor(state) : new ctor();
 		state.registry.set(name, result);
@@ -40,8 +49,6 @@ export function registerSystem(
 export function initializeSystem(state: CometState, depName: string) {
 	if (state.initialized.has(depName)) return;
 	state.initialized.add(depName);
-
-	print(depName);
 
 	const service = state.registry.get(depName);
 	assert(service, string.format(ERROR.SYSTEM_NOT_FOUND, depName));

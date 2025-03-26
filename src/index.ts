@@ -14,9 +14,21 @@ export { Comet, Dependency, System } from "./core";
  * Comet's internal library of systems.
  */
 export const Library = {
+	/**
+	 * UI elements like ribbon buttons, menus, views and more.
+	 */
 	GUI,
+	/**
+	 * Instance tracking and selection.
+	 */
 	Objects,
+	/**
+	 * Meta information like the internal plugin reference.
+	 */
 	Meta,
+	/**
+	 * Recording, undo and redo.
+	 */
 	History
 };
 

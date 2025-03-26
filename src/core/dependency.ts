@@ -16,16 +16,17 @@ export function registerDependency<T>(state: CometState, dependency: ClassRef<T>
 
 	let depService: unknown = state.registry.get(depName);
 
-	// Service is likely lazy loaded. (internal)
-	const lastTarget = state.depTarget;
-	if (depService === undefined) {
+	// Service is lazy loaded.
+	if (state.lazy.has(depName)) {
+		const lastTarget = state.depTarget;
 		state.depTarget = depName;
-		depService = new dependency(state);
+
+		depService = state.internal.has(depName) ? new dependency(state) : new dependency();
 		state.registry.set(depName, depService);
 		state.depTarget = lastTarget;
 	}
 
-	assert(depService, string.format(ERROR.SYSTEM_NOT_FOUND, depName));
+	assert(depService, string.format(ERROR.INVALID_SYSTEM, depName));
 	state.dependencies.push(depName);
 
 	return depService as T;
