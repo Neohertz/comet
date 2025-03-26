@@ -34,5 +34,6 @@ export interface CometState {
 	tracker: Tracker;
 
 	appName: string;
+	runInPlayMode: boolean;
 	appPlugin: Plugin;
 }

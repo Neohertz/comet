@@ -7,6 +7,8 @@ import { ClassRef, SystemConfig } from "../types/comet";
 import { registerDependency } from "./dependency";
 import { addSystemPath } from "./paths";
 
+const isRunning = game.GetService("RunService").IsRunning();
+
 const state: CometState = {
 	dependencies: new Array(),
 	initialized: new Set(),
@@ -20,6 +22,7 @@ const state: CometState = {
 
 	tracker: new Tracker(),
 
+	runInPlayMode: false,
 	appName: "Comet App",
 	appPlugin: script.FindFirstAncestorWhichIsA("Plugin")!
 };
@@ -32,7 +35,10 @@ export namespace Comet {
 	 * @param plugin
 	 * @param name
 	 */
-	export function createApp(name: string) {
+	export function createApp(name: string, enabledWhileRunning = false) {
+		if (isRunning && !enabledWhileRunning) return;
+
+		state.runInPlayMode = enabledWhileRunning;
 		state.appName = name;
 
 		// Register internal systems.
@@ -54,6 +60,7 @@ export namespace Comet {
 	 * @param path
 	 */
 	export function addPaths(path?: Instance) {
+		if (isRunning && !state.runInPlayMode) return;
 		addSystemPath(path);
 	}
 
@@ -61,6 +68,7 @@ export namespace Comet {
 	 * Launch comet. Initialize all systems and dependencies, and launch any lifecycle methods.
 	 */
 	export function launch() {
+		if (isRunning && !state.runInPlayMode) return;
 		launchSystems(state);
 	}
 }
