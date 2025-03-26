@@ -18,15 +18,17 @@ export function registerSystem(
 	state: CometState,
 	ctor: { new (...args: unknown[]): {} },
 	internal?: boolean,
-	config?: SystemConfig,
+	config?: SystemConfig
 ): SystemBase {
 	const name = tostring(ctor);
-	state.depTarget = name;
 
-	const result = internal ? new ctor(state) : new ctor();
-	state.registry.set(name, result);
+	if (!internal) {
+		state.depTarget = name;
+		const result = internal ? new ctor(state) : new ctor();
+		state.registry.set(name, result);
+		state.depTarget = undefined;
+	}
 
-	state.depTarget = undefined;
 	return ctor as SystemBase;
 }
 
@@ -38,6 +40,8 @@ export function registerSystem(
 export function initializeSystem(state: CometState, depName: string) {
 	if (state.initialized.has(depName)) return;
 	state.initialized.add(depName);
+
+	print(depName);
 
 	const service = state.registry.get(depName);
 	assert(service, string.format(ERROR.SYSTEM_NOT_FOUND, depName));

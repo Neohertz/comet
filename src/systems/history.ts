@@ -34,7 +34,7 @@ export class History {
 
 		if (recording === undefined) {
 			Log.warn(
-				`Recording '${this.lastRecording}' has been canceled because a new one was started. Refactor your code to ensure the recording is always handled properly.`,
+				`Recording '${this.lastRecording}' has been canceled because a new one was started. Refactor your code to ensure the recording is always handled properly.`
 			);
 			ChangeHistoryService.FinishRecording("", Enum.FinishRecordingOperation.Cancel, undefined);
 			this.lastRecording = undefined;
@@ -67,7 +67,21 @@ export class History {
 			 */
 			cancel: (options?: object) => {
 				ChangeHistoryService.FinishRecording(recording!, Enum.FinishRecordingOperation.Cancel, options);
-			},
+			}
 		};
+	}
+
+	/**
+	 * Undo the last action.
+	 */
+	public undo() {
+		ChangeHistoryService.Undo();
+	}
+
+	/**
+	 * Redo the last action.
+	 */
+	public redo() {
+		ChangeHistoryService.Redo();
 	}
 }

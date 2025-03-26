@@ -1,4 +1,4 @@
-type TrackableObject = Instance | RBXScriptConnection | thread | Callback;
+export type TrackableObject = Instance | RBXScriptConnection | thread | Callback;
 
 export class Tracker {
 	private store = new Array<TrackableObject>();

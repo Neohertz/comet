@@ -51,7 +51,7 @@ export class GUI {
 		toolTip: string,
 		image: string,
 		toggleable?: boolean,
-		enabledOutsideViewport?: boolean,
+		enabledOutsideViewport?: boolean
 	) {
 		return new Button(this.state, text, toolTip, image, toggleable, enabledOutsideViewport);
 	}

@@ -27,5 +27,5 @@ export interface CometState {
 	tracker: Tracker;
 
 	appName: string;
-	appPlugin: Plugin | undefined;
+	appPlugin: Plugin;
 }

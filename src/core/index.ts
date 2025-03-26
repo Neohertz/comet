@@ -6,7 +6,6 @@ import { launchSystems, registerSystem, SystemBase } from "./system";
 import { ClassRef, SystemConfig } from "../types/comet";
 import { registerDependency } from "./dependency";
 import { addSystemPath } from "./paths";
-import { ERROR } from "../util/errors";
 
 const state: CometState = {
 	registry: new Map<string, SystemBase>(),
@@ -20,7 +19,7 @@ const state: CometState = {
 	tracker: new Tracker(),
 
 	appName: "Comet App",
-	appPlugin: undefined,
+	appPlugin: script.FindFirstAncestorWhichIsA("Plugin")!
 };
 
 /**
@@ -31,12 +30,13 @@ export namespace Comet {
 	 * @param plugin
 	 * @param name
 	 */
-	export function createApp(plugin: Plugin, name: string) {
-		assert(state.appPlugin === undefined, ERROR.CREATED_APP_TWICE);
-		state.appPlugin = plugin;
+	export function createApp(name: string) {
 		state.appName = name;
 
-		plugin.Unloading.Once(() => {
+		// Register internal systems.
+		Comet.addPaths(script.Parent?.FindFirstChild("systems"));
+
+		state.appPlugin.Unloading.Once(() => {
 			state.tracker.clean();
 
 			for (const [_, system] of state.registry) {
@@ -51,7 +51,7 @@ export namespace Comet {
 	 * Register systems within a parent instance. Searches recursively.
 	 * @param path
 	 */
-	export function addPaths(path: unknown) {
+	export function addPaths(path?: Instance) {
 		addSystemPath(path);
 	}
 
