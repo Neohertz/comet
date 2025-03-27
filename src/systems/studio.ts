@@ -1,0 +1,120 @@
+import { InternalSystem } from "../core";
+import { CometState } from "../types/comet";
+
+const SelectionService = game.GetService("Selection");
+
+type OfUnion<T extends { id: AssetTypeId; name: string }> = {
+	[P in T["name"]]: Extract<T, { id: P }>;
+};
+
+const insertService = game.GetService("InsertService");
+
+/**
+ * A system that contains helpful wrappers for studio plugin features.
+ *
+ * **You should never instantiate this class!** Instead, import it via the
+ * `Dependency()` method within a constructor
+ */
+@InternalSystem()
+export class Studio {
+	/**
+	 * Access the plugin global.
+	 */
+	public plugin: Plugin;
+
+	constructor(private state: CometState) {
+		this.plugin = state.appPlugin;
+	}
+
+	/**
+	 * Select a ribbon tool
+	 * @param button
+	 * @param position
+	 */
+	public selectTool(
+		button: Enum.RibbonTool,
+		position = UDim2.fromScale(0.5, 0.5)
+	) {
+		this.state.appPlugin.SelectRibbonTool(button, position);
+	}
+
+	/**
+	 * Attempt to save the selected items to either local storage or the cloud.
+	 *
+	 * Will return a boolean if the operation was successful. **Will only yield when saving locally**.
+	 *
+	 * @returns boolean
+	 */
+	public async saveSelection(
+		saveLocally: boolean,
+		suggestedFileName?: string
+	): Promise<boolean> {
+		if (this.getSelection().size() < 1) return false;
+
+		if (saveLocally) {
+			plugin.SaveSelectedToRoblox();
+			return true;
+		}
+
+		return plugin.PromptSaveSelection(suggestedFileName);
+	}
+
+	/**
+	 * Prompt the user for an asset ID of a given type.
+	 */
+	public async requestAssetId(assetType: keyof OfUnion<AssetType>) {
+		return plugin.PromptForExistingAssetId(assetType);
+	}
+
+	/**
+	 * Attempts to load an asset from roblox's servers. If no asset id is provided, it will prompt the user for one.
+	 * @param assetId
+	 */
+	public async loadAsset<V extends object>(
+		assetId: number
+	): Promise<Model & V> {
+		return insertService.LoadAsset(assetId) as Model & V;
+	}
+
+	/**
+	 * Open a script to a given line. Will return the provided script.
+	 */
+	public openScript<T extends LuaSourceContainer>(
+		source: T,
+		lineNumber?: number
+	): T {
+		this.state.appPlugin.OpenScript(source, lineNumber);
+		return source;
+	}
+
+	/**
+	 * Returns an array of the currently selected items.
+	 * @returns Instance[]
+	 */
+	public getSelection(): Instance[] {
+		return SelectionService.Get();
+	}
+
+	/**
+	 * Select instances.
+	 * If no items are supplied to this function, it will deselect all
+	 * @param obj? Instance | Instance[]
+	 */
+	public select(obj?: Instance | Instance[]) {
+		game.GetService("Selection").Set(
+			obj ? (typeIs(obj, "table") ? (obj as Instance[]) : [obj]) : []
+		);
+	}
+
+	/**
+	 * Bind a callback to selection changes.
+	 * @param fn
+	 */
+	public onSelectionChanged(fn: (selection: Instance[]) => void) {
+		this.state.tracker.handle(
+			SelectionService.SelectionChanged.Connect(() => {
+				fn(this.getSelection());
+			})
+		);
+	}
+}

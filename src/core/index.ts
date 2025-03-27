@@ -1,7 +1,7 @@
 import { doesImplement } from "../util/guards";
 import { OnEnd } from "../types/lifecycle";
 import { CometState } from "../types/comet";
-import { Tracker } from "../util/tracker";
+import { TrackableObject, Tracker } from "../util/tracker";
 import { launchSystems, registerSystem } from "./system";
 import { ClassRef, SystemConfig } from "../types/comet";
 import { registerDependency } from "./dependency";
@@ -42,7 +42,7 @@ export namespace Comet {
 		state.appName = name;
 
 		// Register internal systems.
-		Comet.addPaths(script.Parent?.FindFirstChild("systems"));
+		// Comet.addPaths(script.Parent?.FindFirstChild("systems"));
 
 		state.appPlugin.Unloading.Once(() => {
 			state.tracker.clean();
@@ -106,4 +106,22 @@ export function InternalSystem(config: SystemConfig = {}) {
  */
 export function Dependency<T>(dependency: ClassRef<T>): T {
 	return registerDependency(state, dependency);
+}
+
+/**
+ * Track an object. This object will be cleaned up whenever the plugin unloads.
+ *
+ * Can handle any instance, callback, thread, connection, etc.
+ * @param object
+ */
+export function Track(object: TrackableObject) {
+	state.tracker.handle(object);
+}
+
+/**
+ * Get a reference to the plugin global.
+ * @returns Plugin
+ */
+export function GetPlugin() {
+	return state.appPlugin;
 }

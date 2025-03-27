@@ -11,6 +11,8 @@ export type SystemBase = any;
 /**
  * Register State.dependencies of a given class.
  *
+ * **Used Internally**
+ *
  * Takes in a list of arguments to pass to the constructor (optional)
  * @param fn
  */
@@ -43,6 +45,9 @@ export function registerSystem(
 
 /**
  * Initialize the system by calling it's onInit() method. (if exists)
+ *
+ * **Used Internally**
+ *
  * @param depName
  * @returns
  */
@@ -58,6 +63,12 @@ export function initializeSystem(state: CometState, depName: string) {
 	}
 }
 
+/**
+ * Launch all systems.
+ *
+ * **Used Internally**
+ * @param state
+ */
 export function launchSystems(state: CometState) {
 	assert(state.appPlugin, ERROR.APP_NOT_CREATED);
 
@@ -70,11 +81,15 @@ export function launchSystems(state: CometState) {
 		}
 
 		if (doesImplement<OnRender>(service, "onRender")) {
-			state.tracker.handle(RunService.RenderStepped.Connect((dt) => service.onRender(dt)));
+			state.tracker.handle(
+				RunService.RenderStepped.Connect((dt) => service.onRender(dt))
+			);
 		}
 
 		if (doesImplement<OnHeartbeat>(service, "onHeartbeat")) {
-			state.tracker.handle(RunService.Heartbeat.Connect((dt) => service.onHeartbeat(dt)));
+			state.tracker.handle(
+				RunService.Heartbeat.Connect((dt) => service.onHeartbeat(dt))
+			);
 		}
 	}
 }

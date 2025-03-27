@@ -4,6 +4,12 @@ import { Menu } from "../modules/menu";
 import { View } from "../modules/view";
 import { CometState } from "../types/comet";
 
+/**
+ * A system that contains utilities for creating and managing UI.
+ *
+ * **You should never instantiate this class!** Instead, import it via the
+ * `Dependency()` method within a constructor
+ */
 @InternalSystem()
 export class GUI {
 	constructor(private state: CometState) {}
@@ -16,7 +22,12 @@ export class GUI {
 	 * @param dockState
 	 * @returns View
 	 */
-	public createWidget(name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState) {
+	public createWidget(
+		name: string,
+		size: Vector2,
+		minSize: Vector2,
+		dockState?: Enum.InitialDockState
+	) {
 		return new View(this.state, name, size, minSize, dockState);
 	}
 
@@ -53,6 +64,13 @@ export class GUI {
 		toggleable?: boolean,
 		enabledOutsideViewport?: boolean
 	) {
-		return new Button(this.state, text, toolTip, image, toggleable, enabledOutsideViewport);
+		return new Button(
+			this.state,
+			text,
+			toolTip,
+			image,
+			toggleable,
+			enabledOutsideViewport
+		);
 	}
 }

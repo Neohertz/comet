@@ -1,12 +1,14 @@
 import { InternalSystem } from "../core";
 import { Log } from "../util/log";
 
-/**
- * An internal service for all things history related.
- */
-
 const ChangeHistoryService = game.GetService("ChangeHistoryService");
 
+/**
+ * A system that contains utilities for managing undo/redo waypoints.
+ *
+ * **You should never instantiate this class!** Instead, import it via the
+ * `Dependency()` method within a constructor
+ */
 @InternalSystem()
 export class History {
 	private lastRecording: string | undefined;
@@ -30,15 +32,25 @@ export class History {
 	 * @returns object
 	 */
 	public record(name: string, description?: string) {
-		let recording = ChangeHistoryService.TryBeginRecording(name, description);
+		let recording = ChangeHistoryService.TryBeginRecording(
+			name,
+			description
+		);
 
 		if (recording === undefined) {
 			Log.warn(
 				`Recording '${this.lastRecording}' has been canceled because a new one was started. Refactor your code to ensure the recording is always handled properly.`
 			);
-			ChangeHistoryService.FinishRecording("", Enum.FinishRecordingOperation.Cancel, undefined);
+			ChangeHistoryService.FinishRecording(
+				"",
+				Enum.FinishRecordingOperation.Cancel,
+				undefined
+			);
 			this.lastRecording = undefined;
-			recording = ChangeHistoryService.TryBeginRecording(name, description);
+			recording = ChangeHistoryService.TryBeginRecording(
+				name,
+				description
+			);
 		}
 
 		this.lastRecording = recording;
@@ -50,7 +62,11 @@ export class History {
 			 * @param options
 			 */
 			commit: (options?: object) => {
-				ChangeHistoryService.FinishRecording(recording!, Enum.FinishRecordingOperation.Commit, options);
+				ChangeHistoryService.FinishRecording(
+					recording!,
+					Enum.FinishRecordingOperation.Commit,
+					options
+				);
 			},
 
 			/**
@@ -58,7 +74,11 @@ export class History {
 			 * @param options
 			 */
 			append: (options?: object) => {
-				ChangeHistoryService.FinishRecording(recording!, Enum.FinishRecordingOperation.Append, options);
+				ChangeHistoryService.FinishRecording(
+					recording!,
+					Enum.FinishRecordingOperation.Append,
+					options
+				);
 			},
 
 			/**
@@ -66,7 +86,11 @@ export class History {
 			 * @param options
 			 */
 			cancel: (options?: object) => {
-				ChangeHistoryService.FinishRecording(recording!, Enum.FinishRecordingOperation.Cancel, options);
+				ChangeHistoryService.FinishRecording(
+					recording!,
+					Enum.FinishRecordingOperation.Cancel,
+					options
+				);
 			}
 		};
 	}
