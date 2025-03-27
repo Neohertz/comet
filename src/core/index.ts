@@ -32,6 +32,7 @@ const state: CometState = {
  */
 export namespace Comet {
 	/**
+	 * Initialize the comet app.
 	 * @param plugin
 	 * @param name
 	 */
@@ -56,7 +57,7 @@ export namespace Comet {
 	}
 
 	/**
-	 * Register systems within a parent instance. Searches recursively.
+	 * Register systems within a parent instance. Searches recursively!
 	 * @param path
 	 */
 	export function addPaths(path?: Instance) {
@@ -98,9 +99,30 @@ export function InternalSystem(config: SystemConfig = {}) {
 }
 
 /**
- * Request a dependency for the system.
+ * Request a system.
  *
- * **You should only ever request State.dependencies within a constructor**
+ * **You should only ever request dependencies within a constructor**
+ *
+ * ## Example Usage
+ * ```ts
+ * class MySystem implements OnInit {
+ *  // ✅ Valid
+ * 	private gui = Dependency(GUI)
+ *
+ * 	constructor(
+ * 		// ✅ Valid
+ * 		private audio = Dependency(Audio)
+ * 	) {
+ * 		// ✅ Valid
+ * 		const studio = Dependency(Studio)
+ * 	}
+ *
+ * 	onInit() {
+ * 		// ❌ Invalid! Cannot use Dependency() outside of constructor.
+ * 		const mySystem = Dependency(MySystem)
+ * 	}
+ * }
+ * ```
  * @param dependency
  * @returns
  */
@@ -112,6 +134,15 @@ export function Dependency<T>(dependency: ClassRef<T>): T {
  * Track an object. This object will be cleaned up whenever the plugin unloads.
  *
  * Can handle any instance, callback, thread, connection, etc.
+ *
+ * ## Example Usage
+ * ```ts
+ * ...
+ * onInit() {
+ * 	Track(new Instance("Part")) // Will delete the part on plugin unload.
+ * }
+ * ...
+ * ```
  * @param object
  */
 export function Track(object: TrackableObject) {
