@@ -14,53 +14,78 @@ Comet has been rewritten from scratch to improve the developer experience.
 A simple plugin that allows you to create a note by clicking the ribbon button.
 ```ts
 // src/systems/main-system.ts
-import {
-  CometButton,
-  Dependency,
-  Library,
-  OnEnd,
-  OnInit,
-  System,
-} from "@rbxts/comet";
-import { ServerStorage } from "@rbxts/services";
+import { Audio, Button, Dependency, GUI, OnEnd, OnInit, System, View } from "@rbxts/comet";
+import { ExampleSystem } from "systems/example";
+import { mountReactTree } from "tree";
 
 @System()
-export class MySystem implements OnInit, OnEnd {
-  public noteButton: CometButton;
+export class MainSystem implements OnInit, OnEnd {
+  public openButton: Button;
+  public widget: View;
 
   constructor(
-    private gui = Dependency(Library.GUI),
-    private meta = Dependency(Library.Meta),
-    private objects = Dependency(Library.Objects),
+    // Request comet's internal systems.
+    public audio = Dependency(Audio),
+    public gui = Dependency(GUI),
+    // Request user's systems.
+    public example = Dependency(ExampleSystem)
   ) {
-    this.noteButton = gui.createButton(
-      "Create Note",
-      "",
-      "rbxassetid://7414445494",
-      false,
-      true,
+    this.openButton = gui.createButton(
+      "Open",
+      "Open the plugin's GUI.",
+      "rbxassetid://7414445494"
+    );
+    this.widget = gui.createWidget(
+      "My App",
+      new Vector2(500, 500),
+      Vector2.zero,
+      Enum.InitialDockState.Left
     );
   }
 
-  public writeNote() {
-    const newScript = new Instance("Script", ServerStorage);
-    newScript.Name = "Note";
-    this.objects.track(newScript); // Clean it up on unload.
+  onInit(): void {
+    /** 
+     * Since we have ExampleSystem as a dependency, it will
+     * initialize first.
+     */ 
+    print(this.example.message); // "Hello, World!"
 
-    // Get the plugin reference at any time.
-    const plugin = this.meta.getPlugin();
-    plugin.OpenScript(newScript);
-  }
+    // Link the button's state to the view's visibility.
+    this.widget.linkButton(this.openButton);
 
-  onInit() {
-    // Do something when the button is
-    this.noteButton.onPress(() => {
-      this.writeNote();
+    // Play a sound on click via the internal audio system.
+    this.openButton.onPress(() => {
+      this.audio.play("rbxassetid://15675032796");
+    });
+
+    /**
+     * Quickly mount a UI framework of your choice.
+     * 
+     * Tip: Pass the system down to a context to easily 
+     * access your plugin logic from components!
+     */
+    this.widget.mount((parent) => {
+      return mountReactTree(parent, this);
     });
   }
 
   onEnd(): void {
-    print("Plugin unloaded.");
+    print("Plugin has unloaded.");
+  }
+}
+```
+
+```ts
+// src/systems/example.ts
+import { OnInit, System } from "@rbxts/comet";
+
+@System()
+export class ExampleSystem implements OnInit {
+  public message?: string;
+
+  onInit(): void {
+    print("Example system initialized!");
+    this.message = "Hello, World!";
   }
 }
 ```
