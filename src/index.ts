@@ -3,10 +3,10 @@ export { History } from "./systems/history";
 export { Studio } from "./systems/studio";
 export { Audio } from "./systems/audio";
 
-export { Menu as CometMenu } from "./modules/menu";
-export { View as CometView } from "./modules/view";
-export { Action as CometAction } from "./modules/action";
-export { Button as CometButton } from "./modules/button";
+export type { Menu } from "./modules/menu";
+export type { View } from "./modules/view";
+export type { Action } from "./modules/action";
+export type { Button } from "./modules/button";
 
 export { Comet, Dependency, System, Track } from "./core";
 

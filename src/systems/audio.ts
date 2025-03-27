@@ -1,5 +1,5 @@
-import { CometView } from "..";
 import { Dependency, InternalSystem } from "../core";
+import { View } from "../modules/view";
 import { CometState } from "../types/comet";
 import { GUI } from "./gui";
 
@@ -13,7 +13,7 @@ const ContentProvider = game.GetService("ContentProvider");
  */
 @InternalSystem()
 export class Audio {
-	private soundContainer: CometView;
+	private soundContainer: View;
 	private soundCache: Map<string, Sound>;
 
 	constructor(private state: CometState) {
