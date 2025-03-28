@@ -42,9 +42,6 @@ export namespace Comet {
 		state.runInPlayMode = enabledWhileRunning;
 		state.appName = name;
 
-		// Register internal systems.
-		// Comet.addPaths(script.Parent?.FindFirstChild("systems"));
-
 		state.appPlugin.Unloading.Once(() => {
 			state.tracker.clean();
 
@@ -60,9 +57,9 @@ export namespace Comet {
 	 * Register systems within a parent instance. Searches recursively!
 	 * @param path
 	 */
-	export function addPaths(path?: Instance) {
+	export function addPaths(path?: Instance, recursive = false) {
 		if (isRunning && !state.runInPlayMode) return;
-		addSystemPath(path);
+		addSystemPath(path, recursive);
 	}
 
 	/**
