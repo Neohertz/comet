@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/comet",
-	"version": "2.0.0-beta.1",
+	"version": "2.0.0-beta.2",
 	"description": "A fast framework for plugin development inspired by flamework.",
 	"repository": {
 		"type": "git",
