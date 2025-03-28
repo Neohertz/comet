@@ -5,8 +5,7 @@
 import { LogLevel } from "../core/enum";
 import type { SystemBase } from "../core";
 import { View } from "../modules/view";
-import type { Tracker } from "../util/tracker";
-
+import { Tracker } from "../util/tracker";
 export interface ClassRef<T> {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	new (...args: any[]): T;
@@ -21,6 +20,12 @@ export interface SystemConfig {
 	lazy?: boolean;
 }
 
+export interface LoggerConfig {
+	level: LogLevel;
+	prefix?: string;
+	showLevel: boolean;
+}
+
 export interface CometState {
 	registry: Map<string, SystemBase>;
 	dependencies: Array<string>;
@@ -29,11 +34,7 @@ export interface CometState {
 	lazy: Set<string>;
 	depTarget: string | undefined;
 
-	loggerConfig: {
-		level: LogLevel;
-		showPluginName: boolean;
-		showLevel: boolean;
-	};
+	loggerConfig: LoggerConfig;
 
 	toolbar: PluginToolbar | undefined;
 	windows: Map<string, View>;

@@ -6,15 +6,36 @@ import {
 	OnRender,
 	OnStart
 } from "../types/lifecycle";
-import { TrackableObject } from "../util/tracker";
+import { TrackableObject, Tracker } from "../util/tracker";
 
-import { ClassRef, SystemConfig } from "../types/comet";
-import { cometState } from "./state";
+import { ClassRef, CometState, SystemConfig } from "../types/comet";
 import { CometError, LogLevel } from "./enum";
 import { Logger } from "../util/logger";
 
 const RunService = game.GetService("RunService");
 const isRunning = RunService.IsRunning();
+
+const cometState: CometState = {
+	dependencies: new Array(),
+	initialized: new Set(),
+	depTarget: undefined,
+	registry: new Map(),
+	internal: new Set(),
+	lazy: new Set(),
+
+	loggerConfig: {
+		level: LogLevel.FATAL,
+		showLevel: true
+	},
+
+	toolbar: undefined,
+	windows: new Map(),
+	tracker: new Tracker(),
+
+	runInPlayMode: false,
+	appName: "Comet App",
+	appPlugin: script.FindFirstAncestorWhichIsA("Plugin")!
+};
 
 /**
  * Asserts with at level 0.
@@ -191,7 +212,6 @@ export function Dependency<T>(dependency: ClassRef<T>): T {
 	cometState.dependencies.push(depName);
 
 	Logger.system(
-		print,
 		`Resolved dependency (${cometState.depTarget} depends on ${depName})`
 	);
 
@@ -244,10 +264,7 @@ export namespace Comet {
 		const pool = recursive ? path.GetDescendants() : path.GetChildren();
 		for (const obj of pool) {
 			if (obj.IsA("ModuleScript")) {
-				Logger.system(
-					print,
-					`addPaths() located a system. (${obj.Name})`
-				);
+				Logger.system(`addPaths() located a system. (${obj.Name})`);
 				loadModule(obj);
 			}
 		}
@@ -265,11 +282,11 @@ export namespace Comet {
 		showLevel = true,
 		showPluginName = false
 	) {
-		cometState.loggerConfig = {
+		Logger.updateLogger({
 			level,
 			showLevel,
-			showPluginName
-		};
+			prefix: showPluginName ? cometState.appName : undefined
+		});
 	}
 
 	/**
@@ -284,7 +301,6 @@ export namespace Comet {
 		for (const [depName] of cometState.registry) initializeSystem(depName);
 
 		Logger.system(
-			print,
 			`Successfully lauched ${cometState.registry.size()} systems. (${cometState.dependencies.size()} Dependencies resolved)`
 		);
 

@@ -1,19 +1,36 @@
 import { LogLevel } from "../core/enum";
-import { cometState } from "../core/state";
-
-function fmt(prefix: string, ...args: defined[]): string {
-	let res = "";
-	if (cometState.loggerConfig.showPluginName)
-		res += `[${cometState.appName}] `;
-	if (cometState.loggerConfig.showLevel) res += `[${prefix}] `;
-	res += args.map((v) => tostring(v)).join(", ");
-	return res;
-}
+import { LoggerConfig } from "../types/comet";
 
 /**
  * A generic logging system. End user accessible!
  */
 class LoggerInstance {
+	private config: LoggerConfig;
+
+	constructor() {
+		this.config = {
+			level: LogLevel.WARNING,
+			showLevel: true
+		};
+	}
+
+	private fmt(level: string, ...args: defined[]): string {
+		let res = "";
+		if (this.config.prefix !== undefined) res += `[${this.config.prefix}] `;
+		if (this.config.showLevel) res += `[${level}] `;
+		res += args.map((v) => tostring(v)).join(", ");
+		return res;
+	}
+
+	/**
+	 * Reconfigure the logger at runtime.
+	 * @param config
+	 * @hidden
+	 */
+	public updateLogger(config: LoggerConfig) {
+		this.config = config;
+	}
+
 	/**
 	 * Used for internal verbose logging.
 	 * @param fn
@@ -21,7 +38,7 @@ class LoggerInstance {
 	 * @hidden
 	 */
 	public system(...args: defined[]) {
-		if (cometState.loggerConfig.level > LogLevel.SYSTEM) return;
+		if (this.config.level > LogLevel.SYSTEM) return;
 		warn("COMET:DEBUG --", ...args);
 	}
 
@@ -31,8 +48,8 @@ class LoggerInstance {
 	 * @returns
 	 */
 	public verbose(...args: defined[]) {
-		if (cometState.loggerConfig.level > LogLevel.VERBOSE) return;
-		print(fmt("VRB", ...args));
+		if (this.config.level > LogLevel.VERBOSE) return;
+		print(this.fmt("VRB", ...args));
 	}
 
 	/**
@@ -41,8 +58,8 @@ class LoggerInstance {
 	 * @returns
 	 */
 	public warn(...args: defined[]) {
-		if (cometState.loggerConfig.level > LogLevel.WARNING) return;
-		warn(fmt("WARN", ...args));
+		if (this.config.level > LogLevel.WARNING) return;
+		warn(this.fmt("WARN", ...args));
 	}
 
 	/**
@@ -51,8 +68,8 @@ class LoggerInstance {
 	 * @returns
 	 */
 	public error(...args: defined[]) {
-		if (cometState.loggerConfig.level > LogLevel.ERROR) return;
-		error(fmt("ERR", ...args), 2);
+		if (this.config.level > LogLevel.ERROR) return;
+		error(this.fmt("ERR", ...args), 2);
 	}
 
 	/**
@@ -61,8 +78,8 @@ class LoggerInstance {
 	 * @returns
 	 */
 	public fatal(...args: defined[]) {
-		if (cometState.loggerConfig.level > LogLevel.FATAL) return;
-		error(fmt("FATAL", ...args), 2);
+		if (this.config.level > LogLevel.FATAL) return;
+		error(this.fmt("FATAL", ...args), 2);
 	}
 }
 
