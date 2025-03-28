@@ -11,6 +11,7 @@ const insertService = game.GetService("InsertService");
 
 /**
  * A system that contains helpful wrappers for studio plugin features.
+ * Most methods are wrappers with stronger typings than the original.
  *
  * **You should never instantiate this class!** Instead, import it via the
  * `Dependency()` method within a constructor
@@ -35,7 +36,7 @@ export class Studio {
 		button: Enum.RibbonTool,
 		position = UDim2.fromScale(0.5, 0.5)
 	) {
-		this.state.appPlugin.SelectRibbonTool(button, position);
+		this.plugin.SelectRibbonTool(button, position);
 	}
 
 	/**
@@ -52,18 +53,20 @@ export class Studio {
 		if (this.getSelection().size() < 1) return false;
 
 		if (saveLocally) {
-			plugin.SaveSelectedToRoblox();
+			this.plugin.SaveSelectedToRoblox();
 			return true;
 		}
 
-		return plugin.PromptSaveSelection(suggestedFileName);
+		return this.plugin.PromptSaveSelection(suggestedFileName);
 	}
 
 	/**
 	 * Prompt the user for an asset ID of a given type.
+	 *
+	 * This method will inevitably error if the asset type isn't supported by roblox.
 	 */
 	public async requestAssetId(assetType: keyof OfUnion<AssetType>) {
-		return plugin.PromptForExistingAssetId(assetType);
+		return this.plugin.PromptForExistingAssetId(assetType);
 	}
 
 	/**
@@ -83,7 +86,7 @@ export class Studio {
 		source: T,
 		lineNumber?: number
 	): T {
-		this.state.appPlugin.OpenScript(source, lineNumber);
+		this.plugin.OpenScript(source, lineNumber);
 		return source;
 	}
 
