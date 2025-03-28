@@ -106,7 +106,7 @@ export function InternalSystem(config: SystemConfig = {}) {
  * ## Example Usage
  * ```ts
  * class MySystem implements OnInit {
- *  // ✅ Valid
+ * 	// ✅ Valid
  * 	private gui = Dependency(GUI)
  *
  * 	constructor(
@@ -119,7 +119,7 @@ export function InternalSystem(config: SystemConfig = {}) {
  *
  * 	onInit() {
  * 		// ❌ Invalid! Cannot use Dependency() outside of constructor.
- * 		const mySystem = Dependency(MySystem)
+ * 		const history = Dependency(History)
  * 	}
  * }
  * ```

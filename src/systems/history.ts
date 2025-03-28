@@ -20,7 +20,7 @@ export class History {
 	private lastRecording: string | undefined;
 
 	/**
-	 * Wrapper for `record()` that allows you to quickly try an operation and abort changes if it fails.
+	 * A pcall-like wrapper for `record()` that allows you to quickly try an operation and abort changes if it fails.
 	 *
 	 * @param config
 	 * @param fn
@@ -32,7 +32,7 @@ export class History {
 		...args: Parameters<T>
 	): Promise<ReturnType<T>>;
 	/**
-	 * Wrapper for `record()` that allows you to quickly try an operation and abort changes if it fails.
+	 * A pcall-like wrapper for `record()` that allows you to quickly try an operation and abort changes if it fails.
 	 *
 	 * Within the configuration, you may choose the action that is taken upon successful execution.
 	 * This will default to `commit`.
