@@ -1,3 +1,4 @@
+export { History } from "./systems/history";
 export { Status } from "./systems/status";
 export { GUI } from "./systems/gui";
 export { Studio } from "./systems/studio";

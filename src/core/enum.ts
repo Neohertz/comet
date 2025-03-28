@@ -3,13 +3,16 @@
  */
 export enum LogLevel {
 	/**
-	 * At this level, all of comet's internal debug messages will be printed to the console.
+	 * At this level, **all** logs will be printed to the console. *This including comet's internal debug messages.*
 	 */
 	SYSTEM = 0,
 	VERBOSE = 1,
 	WARNING = 2,
 	ERROR = 3,
 	FATAL = 4,
+	/**
+	 * At this level, the logger will do nothing.
+	 */
 	SILENT = 5
 }
 

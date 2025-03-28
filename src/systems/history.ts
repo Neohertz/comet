@@ -1,4 +1,5 @@
 import { InternalSystem } from "../core";
+import { CometState } from "../types/comet";
 import { Logger } from "../util/logger";
 
 const ChangeHistoryService = game.GetService("ChangeHistoryService");
@@ -18,6 +19,8 @@ interface RecordConfig {
 @InternalSystem()
 export class History {
 	private lastRecording: string | undefined;
+
+	constructor(private state: CometState) {}
 
 	/**
 	 * A pcall-like wrapper for `record()` that allows you to quickly try an operation and abort changes if it fails.
