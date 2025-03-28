@@ -2,7 +2,8 @@
  * Allows passing a class itself instead of an instance.
  */
 
-import type { SystemBase } from "../core/system";
+import { LogLevel } from "../core/enum";
+import type { SystemBase } from "../core";
 import { View } from "../modules/view";
 import type { Tracker } from "../util/tracker";
 
@@ -27,6 +28,12 @@ export interface CometState {
 	internal: Set<string>;
 	lazy: Set<string>;
 	depTarget: string | undefined;
+
+	loggerConfig: {
+		level: LogLevel;
+		showPluginName: boolean;
+		showLevel: boolean;
+	};
 
 	toolbar: PluginToolbar | undefined;
 	windows: Map<string, View>;

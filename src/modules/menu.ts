@@ -1,5 +1,5 @@
 import { CometState } from "../types/comet";
-import { ERROR } from "../util/errors";
+import { CometError } from "../core/enum";
 
 const HttpService = game.GetService("HttpService");
 
@@ -14,12 +14,14 @@ export class Menu {
 	private actions: PluginAction[];
 
 	constructor(private state: CometState) {
-		assert(state.appPlugin, ERROR.APP_NOT_CREATED);
+		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
 		this.menus = new Array();
 		this.actions = new Array();
 
-		this.rootMenu = state.appPlugin.CreatePluginMenu(HttpService.GenerateGUID());
+		this.rootMenu = state.appPlugin.CreatePluginMenu(
+			HttpService.GenerateGUID()
+		);
 		this.currentMenu = this.rootMenu;
 
 		this.menus.push(this.rootMenu);
@@ -55,7 +57,11 @@ export class Menu {
 	 * @returns
 	 */
 	action(title: string, icon?: string, cb?: () => void) {
-		const action = this.currentMenu.AddNewAction(HttpService.GenerateGUID(), title, icon);
+		const action = this.currentMenu.AddNewAction(
+			HttpService.GenerateGUID(),
+			title,
+			icon
+		);
 		this.state.tracker.handle(action);
 		this.state.tracker.handle(action.Triggered.Connect(() => cb?.()));
 		return this;
@@ -67,8 +73,12 @@ export class Menu {
 	 * @param icon
 	 */
 	submenu(title?: string, icon?: string) {
-		assert(this.state.appPlugin, ERROR.APP_NOT_CREATED);
-		const menu = this.state.appPlugin.CreatePluginMenu(HttpService.GenerateGUID(), title, icon);
+		assert(this.state.appPlugin, CometError.APP_NOT_CREATED);
+		const menu = this.state.appPlugin.CreatePluginMenu(
+			HttpService.GenerateGUID(),
+			title,
+			icon
+		);
 		menu.Title = title ?? "";
 		this.currentMenu.AddMenu(menu);
 		this.currentMenu = menu;

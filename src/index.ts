@@ -1,5 +1,4 @@
 export { GUI } from "./systems/gui";
-export { History } from "./systems/history";
 export { Studio } from "./systems/studio";
 export { Audio } from "./systems/audio";
 
@@ -8,7 +7,10 @@ export type { View } from "./modules/view";
 export type { Action } from "./modules/action";
 export type { Button } from "./modules/button";
 
-export { Comet, Dependency, System, Track } from "./core";
+export { Comet, Track, System, Dependency } from "./core";
+
+export { LogLevel } from "./core/enum";
+export { Logger } from "./util/logger";
 
 export type {
 	OnEnd,

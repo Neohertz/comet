@@ -1,5 +1,5 @@
 import Signal from "@rbxts/lemon-signal";
-import { ERROR } from "../util/errors";
+import { CometError } from "../core/enum";
 import { CometState } from "./../types/comet.d";
 
 /**
@@ -18,15 +18,13 @@ export class Button {
 		toolTip: string,
 		image: string,
 		toggleable = true,
-		enabledOutsideViewport = false,
+		enabledOutsideViewport = false
 	) {
-		assert(state.appPlugin, ERROR.APP_NOT_CREATED);
+		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
 		if (!state.toolbar) {
 			state.toolbar = state.appPlugin.CreateToolbar(state.appName);
 		}
-
-		//this.clickEvent = Networking.Event();
 
 		this.button = state.toolbar.CreateButton(text, toolTip, image);
 		this.button.ClickableWhenViewportHidden = enabledOutsideViewport;
@@ -45,7 +43,7 @@ export class Button {
 				this.button.Enabled = true;
 
 				this.clickEvent.Fire();
-			}),
+			})
 		);
 	}
 

@@ -1,4 +1,4 @@
-import { ERROR } from "../util/errors";
+import { CometError } from "../core/enum";
 import { CometState } from "./../types/comet.d";
 /**
  * This class utilizes builder functions to easily construct context menus.
@@ -12,11 +12,17 @@ export class Action {
 		name: string,
 		statusTip: string,
 		icon?: string,
-		allowBinding?: boolean,
+		allowBinding?: boolean
 	) {
-		assert(state.appPlugin, ERROR.APP_NOT_CREATED);
+		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
-		this.action = state.appPlugin.CreatePluginAction(id, name, statusTip, icon, allowBinding);
+		this.action = state.appPlugin.CreatePluginAction(
+			id,
+			name,
+			statusTip,
+			icon,
+			allowBinding
+		);
 		state.tracker.handle(() => this.cleanup());
 	}
 

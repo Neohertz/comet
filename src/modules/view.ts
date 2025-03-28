@@ -1,5 +1,5 @@
 import { CometState } from "../types/comet";
-import { ERROR } from "../util/errors";
+import { CometError } from "../core/enum";
 import Signal from "@rbxts/lemon-signal";
 import { Button } from "./button";
 
@@ -24,16 +24,25 @@ export class View {
 	 * @param size
 	 * @param minSize
 	 */
-	constructor(state: CometState, name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState);
+	constructor(
+		state: CometState,
+		name: string,
+		size: Vector2,
+		minSize: Vector2,
+		dockState?: Enum.InitialDockState
+	);
 	constructor(
 		private state: CometState,
 		name: string,
 		size?: Vector2,
 		minSize?: Vector2,
-		dockState = Enum.InitialDockState.Float,
+		dockState = Enum.InitialDockState.Float
 	) {
-		assert(!state.windows.has(name), "[Comet] Detected multiple windows with the same name.");
-		assert(state.appPlugin, ERROR.APP_NOT_CREATED);
+		assert(
+			!state.windows.has(name),
+			"[Comet] Detected multiple windows with the same name."
+		);
+		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
 		this.onCloseBind = new Signal();
 
@@ -41,13 +50,24 @@ export class View {
 		if (size && minSize) {
 			this.container = state.appPlugin.CreateDockWidgetPluginGui(
 				HttpService.GenerateGUID(),
-				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, minSize.X, minSize.Y),
+				new DockWidgetPluginGuiInfo(
+					dockState,
+					false,
+					true,
+					size.X,
+					size.Y,
+					minSize.X,
+					minSize.Y
+				)
 			);
 
 			(this.container as DockWidgetPluginGui).Title = name;
 			this.container.BindToClose(() => this.onCloseBind.Fire());
 		} else {
-			this.container = new Instance("ScreenGui", game.GetService("CoreGui"));
+			this.container = new Instance(
+				"ScreenGui",
+				game.GetService("CoreGui")
+			);
 			this.container.IgnoreGuiInset = true;
 			this.container.Enabled = false;
 			state.tracker.handle(this.container);
@@ -108,8 +128,14 @@ export class View {
 	 * @param method (root: Instance) => (() => void)
 	 */
 	mount<T extends GuiBase>(method: (root: Instance) => () => void): void;
-	mount<T extends GuiBase>(element: T | ((root: Instance) => () => void), createCopy = false) {
-		assert(this.container, "Container instance is nill. This is most likely a bug.");
+	mount<T extends GuiBase>(
+		element: T | ((root: Instance) => () => void),
+		createCopy = false
+	) {
+		assert(
+			this.container,
+			"Container instance is nill. This is most likely a bug."
+		);
 
 		if (typeIs(element, "function")) {
 			const cb = element(this.container);

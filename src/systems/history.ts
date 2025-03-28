@@ -1,5 +1,5 @@
 import { InternalSystem } from "../core";
-import { Log } from "../util/log";
+import { Logger } from "../util/logger";
 
 const ChangeHistoryService = game.GetService("ChangeHistoryService");
 
@@ -89,7 +89,7 @@ export class History {
 		);
 
 		if (recording === undefined) {
-			Log.warn(
+			Logger.warn(
 				`Recording '${this.lastRecording}' has been canceled because a new one was started. Refactor your code to ensure the recording is always handled properly.`
 			);
 			ChangeHistoryService.FinishRecording(

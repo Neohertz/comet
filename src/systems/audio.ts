@@ -1,4 +1,5 @@
-import { Dependency, InternalSystem } from "../core";
+import { InternalSystem } from "../core";
+import { Dependency } from "../core";
 import { View } from "../modules/view";
 import { CometState } from "../types/comet";
 import { GUI } from "./gui";
