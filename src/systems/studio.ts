@@ -70,16 +70,6 @@ export class Studio {
 	}
 
 	/**
-	 * Attempts to load an asset from roblox's servers. If no asset id is provided, it will prompt the user for one.
-	 * @param assetId
-	 */
-	public async loadAsset<V extends object>(
-		assetId: number
-	): Promise<Model & V> {
-		return insertService.LoadAsset(assetId) as Model & V;
-	}
-
-	/**
 	 * Open a script to a given line. Will return the provided script.
 	 */
 	public openScript<T extends LuaSourceContainer>(
