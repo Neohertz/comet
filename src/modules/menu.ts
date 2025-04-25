@@ -1,5 +1,7 @@
-import { HttpService } from "@rbxts/services";
-import { State } from "../state";
+import { CometState } from "../types/comet";
+import { CometError } from "../core/enum";
+
+const HttpService = game.GetService("HttpService");
 
 /**
  * This class utilizes builder functions to easily construct context menus.
@@ -11,16 +13,20 @@ export class Menu {
 	private menus: PluginMenu[];
 	private actions: PluginAction[];
 
-	constructor() {
+	constructor(private state: CometState) {
+		assert(state.appPlugin, CometError.APP_NOT_CREATED);
+
 		this.menus = new Array();
 		this.actions = new Array();
 
-		this.rootMenu = State.plugin.CreatePluginMenu(HttpService.GenerateGUID());
+		this.rootMenu = state.appPlugin.CreatePluginMenu(
+			HttpService.GenerateGUID()
+		);
 		this.currentMenu = this.rootMenu;
 
 		this.menus.push(this.rootMenu);
 
-		State.maid.Add(() => this.cleanup());
+		state.tracker.handle(() => this.cleanup());
 	}
 
 	private cleanup() {
@@ -51,9 +57,13 @@ export class Menu {
 	 * @returns
 	 */
 	action(title: string, icon?: string, cb?: () => void) {
-		const action = this.currentMenu.AddNewAction(HttpService.GenerateGUID(), title, icon);
-		State.maid.Add(action);
-		State.maid.Add(action.Triggered.Connect(() => cb?.()));
+		const action = this.currentMenu.AddNewAction(
+			HttpService.GenerateGUID(),
+			title,
+			icon
+		);
+		this.state.tracker.handle(action);
+		this.state.tracker.handle(action.Triggered.Connect(() => cb?.()));
 		return this;
 	}
 
@@ -63,7 +73,12 @@ export class Menu {
 	 * @param icon
 	 */
 	submenu(title?: string, icon?: string) {
-		const menu = State.plugin.CreatePluginMenu(HttpService.GenerateGUID(), title, icon);
+		assert(this.state.appPlugin, CometError.APP_NOT_CREATED);
+		const menu = this.state.appPlugin.CreatePluginMenu(
+			HttpService.GenerateGUID(),
+			title,
+			icon
+		);
 		menu.Title = title ?? "";
 		this.currentMenu.AddMenu(menu);
 		this.currentMenu = menu;

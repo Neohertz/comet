@@ -1,8 +1,22 @@
-export { System, Comet, OnInit, OnStart, OnRender, OnEnd } from "./comet";
+export { History } from "./systems/history";
+export { GUI } from "./systems/gui";
+export { Studio } from "./systems/studio";
+export { Audio } from "./systems/audio";
 
-export { Action as CometAction } from "./comet/internal/action";
-export { Button as CometButton } from "./comet/internal/button";
-export { Menu as CometMenu } from "./comet/internal/menu";
-export { View as CometView } from "./comet/internal/view";
+export type { Menu } from "./modules/menu";
+export type { View } from "./modules/view";
+export type { Action } from "./modules/action";
+export type { Button } from "./modules/button";
 
-export { Networking } from "./comet/networking";
+export { Comet, Track, System, Dependency } from "./core";
+
+export { LogLevel } from "./core/enum";
+export { Logger } from "./util/logger";
+
+export type {
+	OnEnd,
+	OnHeartbeat,
+	OnInit,
+	OnRender,
+	OnStart
+} from "./types/lifecycle";

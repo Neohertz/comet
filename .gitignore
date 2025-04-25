@@ -1,3 +1,6 @@
+
+/docs/.vitepress/cache
+
 /node_modules
 /out
 /include

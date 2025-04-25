@@ -9,6 +9,10 @@
 		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
 		"editor.formatOnSave": true
 	},
+	"[markdown]": {
+		"editor.defaultFormatter": "vscode.markdown-language-features",
+		"editor.formatOnSave": true
+	},
 	"eslint.run": "onType",
 	"eslint.format.enable": true,
 	"explorer.excludeGitIgnore": false

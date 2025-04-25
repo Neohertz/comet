@@ -1,47 +1,77 @@
-import { HttpService } from "@rbxts/services";
+import { CometState } from "../types/comet";
+import { CometError } from "../core/enum";
+import Signal from "@rbxts/lemon-signal";
 import { Button } from "./button";
-import { State } from "../state";
-import { Networking } from "../networking";
+import { Logger } from "../util/logger";
+
+const HttpService = game.GetService("HttpService");
 
 /**
  * A view is a container for GUI elements.
  */
 export class View {
 	readonly container: DockWidgetPluginGui | ScreenGui;
-	private onCloseBind: Networking.Event;
+	private onCloseBind: Signal;
 
 	/**
 	 * Create a window that renders on the viewport.
 	 * @param app
 	 * @param name
 	 */
-	constructor(name: string);
+	constructor(state: CometState, name: string);
 	/**
 	 * Create a window that renders in a widget.
 	 * @param name
 	 * @param size
 	 * @param minSize
 	 */
-	constructor(name: string, size: Vector2, minSize: Vector2, dockState?: Enum.InitialDockState);
-	constructor(name: string, size?: Vector2, minSize?: Vector2, dockState = Enum.InitialDockState.Float) {
-		assert(!State.windows.has(name), "[Comet] Detected multiple windows with the same name.");
+	constructor(
+		state: CometState,
+		name: string,
+		size: Vector2,
+		minSize: Vector2,
+		dockState?: Enum.InitialDockState
+	);
+	constructor(
+		private state: CometState,
+		name: string,
+		size?: Vector2,
+		minSize?: Vector2,
+		dockState = Enum.InitialDockState.Float
+	) {
+		assert(
+			!state.windows.has(name),
+			"[Comet] Detected multiple windows with the same name."
+		);
+		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
-		this.onCloseBind = Networking.Event();
+		this.onCloseBind = new Signal();
 
 		// If both size and maxSize are given, we know we are creating a dock widget.
 		if (size && minSize) {
-			this.container = State.plugin.CreateDockWidgetPluginGui(
+			this.container = state.appPlugin.CreateDockWidgetPluginGui(
 				HttpService.GenerateGUID(),
-				new DockWidgetPluginGuiInfo(dockState, false, true, size.X, size.Y, minSize.X, minSize.Y),
+				new DockWidgetPluginGuiInfo(
+					dockState,
+					false,
+					true,
+					size.X,
+					size.Y,
+					minSize.X,
+					minSize.Y
+				)
 			);
 
 			(this.container as DockWidgetPluginGui).Title = name;
-			this.container.BindToClose(() => this.onCloseBind.fire());
+			this.container.BindToClose(() => this.onCloseBind.Fire());
 		} else {
-			this.container = new Instance("ScreenGui", game.GetService("CoreGui"));
+			this.container = new Instance(
+				"ScreenGui",
+				game.GetService("CoreGui")
+			);
 			this.container.IgnoreGuiInset = true;
 			this.container.Enabled = false;
-			State.maid.Add(this.container);
+			state.tracker.handle(this.container);
 		}
 	}
 
@@ -50,14 +80,16 @@ export class View {
 	 * @param cb
 	 */
 	onClose(cb: () => void) {
-		this.onCloseBind.connect(cb);
+		this.onCloseBind.Connect(cb);
 	}
 
 	/**
 	 * Fired whenever the window opens.
 	 * @param cb
 	 */
-	onOpen(cb: () => void) {}
+	onOpen(cb: () => void) {
+		Logger.warn("OnOpen is not implemented.");
+	}
 
 	/**
 	 * Set visibility of the window.
@@ -74,7 +106,7 @@ export class View {
 	 * @param button Button
 	 */
 	linkButton(button: Button) {
-		this.onCloseBind.connect(() => button.setPressed(false));
+		this.onCloseBind.Connect(() => button.setPressed(false));
 		button.onPress((state) => this.setVisible(state));
 	}
 
@@ -99,16 +131,22 @@ export class View {
 	 * @param method (root: Instance) => (() => void)
 	 */
 	mount<T extends GuiBase>(method: (root: Instance) => () => void): void;
-	mount<T extends GuiBase>(element: T | ((root: Instance) => () => void), createCopy = false) {
-		assert(this.container, "Container instance is nill. This is most likely a bug.");
+	mount<T extends GuiBase>(
+		element: T | ((root: Instance) => () => void),
+		createCopy = false
+	) {
+		assert(
+			this.container,
+			"Container instance is nill. This is most likely a bug."
+		);
 
 		if (typeIs(element, "function")) {
 			const cb = element(this.container);
-			State.maid.Add(cb, true);
+			this.state.tracker.handle(() => cb());
 		} else {
 			if (createCopy) element = element.Clone();
 			(element as GuiBase).Parent = this.container;
-			State.maid.Add(element);
+			this.state.tracker.handle(element);
 			return element;
 		}
 	}
