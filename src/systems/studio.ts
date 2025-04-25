@@ -1,4 +1,5 @@
 import { InternalSystem } from "../core";
+import { Action } from "../modules/action";
 import { CometState } from "../types/comet";
 
 const SelectionService = game.GetService("Selection");
@@ -25,6 +26,25 @@ export class Studio {
 
 	constructor(private state: CometState) {
 		this.plugin = state.appPlugin;
+	}
+
+	/**
+	 * Create a plugin action.
+	 * @param id
+	 * @param name
+	 * @param statusTip
+	 * @param icon
+	 * @param allowBinding
+	 * @returns
+	 */
+	public createAction(
+		id: string,
+		name: string,
+		statusTip: string,
+		icon?: string,
+		allowBinding?: boolean
+	) {
+		return new Action(this.state, id, name, statusTip, icon, allowBinding);
 	}
 
 	/**

@@ -2,6 +2,7 @@ import { CometState } from "../types/comet";
 import { CometError } from "../core/enum";
 import Signal from "@rbxts/lemon-signal";
 import { Button } from "./button";
+import { Logger } from "../util/logger";
 
 const HttpService = game.GetService("HttpService");
 
@@ -86,7 +87,9 @@ export class View {
 	 * Fired whenever the window opens.
 	 * @param cb
 	 */
-	onOpen(cb: () => void) {}
+	onOpen(cb: () => void) {
+		Logger.warn("OnOpen is not implemented.");
+	}
 
 	/**
 	 * Set visibility of the window.
