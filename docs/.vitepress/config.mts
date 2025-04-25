@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
 	title: "Comet v2.0",
+	base: "/comet/",
 	description: "Documentation for Comet v2.0",
 	themeConfig: {
 		// https://vitepress.dev/reference/default-theme-config
