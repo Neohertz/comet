@@ -11,7 +11,6 @@ import { ExampleSystem } from "systems/example";
 @System()
 export class MainSystem implements OnInit, OnEnd {
 	public exampleSystem = Dependency(ExampleSystem);
-
 	public openButton: Button;
 	public widget: View;
 
@@ -59,3 +58,7 @@ Comet.addPaths(script.Parent.Systems);
 ...
 Comet.launch()
 ```
+<br>
+
+---
+Looking for more information? Check out the [API Docs](/api/globals/comet).

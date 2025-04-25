@@ -58,6 +58,5 @@ launch(): void
 
 ### Usage
 ```ts
-// Recursively search through the "systems" folder.
 Comet.launch()
 ```
