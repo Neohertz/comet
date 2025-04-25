@@ -1,102 +1,49 @@
-# Comet v2.0
+[version-shield]: https://img.shields.io/npm/v/%40rbxts%2Fcomet?style=for-the-badge
+[version-url]: https://www.npmjs.com/package/@rbxts/comet?activeTab=versions
 
-A modular, singleton based framework for building plugins for Roblox Studio.
+[downloads-shield]: https://img.shields.io/npm/d18m/%40rbxts%2Fcomet?style=for-the-badge
+[downloads-url]: https://www.npmjs.com/package/@rbxts/comet
 
-## What's new in v2.0?
-Comet has been rewritten from scratch to improve the developer experience.
+[stars-shield]: https://img.shields.io/github/stars/neohertz/comet?style=for-the-badge
+[stars-url]: https://github.com/Neohertz/comet/stargazers
 
-- Proper dependencies and load order resolution.
-- Utilities are now modules. No more messy classes.
-- Added `onHeartbeat` lifecycle method.
-- Systems are declared via `@System` decorator.
+[issues-shield]: https://img.shields.io/github/issues/neohertz/comet?style=for-the-badge
+[issues-url]: https://github.com/Neohertz/comet/issues
 
-## Example Usage:
-A simple plugin that allows you to create a note by clicking the ribbon button.
-```ts
-// src/systems/main-system.ts
-import { Audio, Button, Dependency, GUI, OnEnd, OnInit, System, View } from "@rbxts/comet";
-import { ExampleSystem } from "systems/example";
-import { mountReactTree } from "tree";
+[license-shield]: https://img.shields.io/github/license/neohertz/comet?style=for-the-badge
+[license-url]: https://github.com/Neohertz/comet/blob/master/LICENSE
 
-@System()
-export class MainSystem implements OnInit, OnEnd {
-  public openButton: Button;
-  public widget: View;
+<div align="center">
+    <a href="https://github.com/Neohertz/comet"><img width="150" height="150" src="docs/public/logo.png" alt="Crate"></a>
+</div>
 
-  constructor(
-    // Request comet's internal systems.
-    public audio = Dependency(Audio),
-    public gui = Dependency(GUI),
-    // Request user's systems.
-    public example = Dependency(ExampleSystem)
-  ) {
-    this.openButton = gui.createButton(
-      "Open",
-      "Open the plugin's GUI.",
-      "rbxassetid://7414445494"
-    );
-    this.widget = gui.createWidget(
-      "My App",
-      new Vector2(500, 500),
-      Vector2.zero,
-      Enum.InitialDockState.Left
-    );
-  }
+<h1 align="center">
+	Comet
+</h1>
 
-  onInit(): void {
-    /** 
-     * Since we have ExampleSystem as a dependency, it will
-     * initialize first.
-     */ 
-    print(this.example.message); // "Hello, World!"
 
-    // Link the button's state to the view's visibility.
-    this.widget.linkButton(this.openButton);
 
-    // Play a sound on click via the internal audio system.
-    this.openButton.onPress(() => {
-      this.audio.play("rbxassetid://15675032796");
-    });
+<h4 align="center">
+    <b>
+        A modular, singleton based framework for building plugins for Roblox Studio.
+    </b>
+<h4>
 
-    /**
-     * Quickly mount a UI framework of your choice.
-     * 
-     * Tip: Pass the system down to a context to easily 
-     * access your plugin logic from components!
-     */
-    this.widget.mount((parent) => {
-      return mountReactTree(parent, this);
-    });
-  }
+<div align="center">
 
-  onEnd(): void {
-    print("Plugin has unloaded.");
-  }
-}
-```
+[![Downloads][downloads-shield]][downloads-url]
+[![Stargazers][stars-shield]][stars-url] 
+[![Issues][issues-shield]][issues-url]
+[![License][license-shield]][license-url]
+[![version][version-shield]][version-url]
 
-```ts
-// src/systems/example.ts
-import { OnInit, System } from "@rbxts/comet";
+</div>
 
-@System()
-export class ExampleSystem implements OnInit {
-  public message?: string;
+<p align="center">
+    <a href="https://neohertz.github.io/comet/">Learn More →</a>
+</p>
 
-  onInit(): void {
-    print("Example system initialized!");
-    this.message = "Hello, World!";
-  }
-}
-```
 
-```ts
-// src/init.server.ts
-import { Comet } from "@rbxts/comet";
 
-Comet.createApp("My awesome plugin!");
-Comet.addPaths(script.Parent.Systems);
-Comet.launch();
-```
 
-To learn more, visit the [Docs](https://neohertz.dev/docs/comet/about)
+
