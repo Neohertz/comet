@@ -26,6 +26,8 @@ export class Audio {
 			Vector2.zero,
 			Vector2.zero
 		);
+
+		state.tracker.handle(() => this.cleanup());
 	}
 
 	/**
@@ -94,5 +96,9 @@ export class Audio {
 		const sound = this.createSound(id);
 		this.soundCache.set(id, sound);
 		return sound;
+	}
+
+	private cleanup() {
+		for (const [_, sound] of this.soundCache) sound?.Destroy();
 	}
 }
