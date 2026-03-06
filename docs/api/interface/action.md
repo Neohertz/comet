@@ -3,7 +3,7 @@
 > Related: [Studio System](/api/modules/studio)
 
 ## `onTrigger()`
-Listen for the action.
+Subscribe to the trigger event of the action. This event is fired whenever the action is triggered, whether through a keybind or through the command palette.
 
 ### Usage
 ```ts filename="Type"

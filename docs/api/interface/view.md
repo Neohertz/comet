@@ -49,6 +49,10 @@ this.setVisible(state: boolean): void
 ## `linkButton()` 
 Link a toolbar button to the visibility of the view.
 
+::: warning
+This will throw an error if the button isn't configured as toggleable.
+:::
+
 ### Usage
 ```ts 
 this.linkButton(button: Button): void
