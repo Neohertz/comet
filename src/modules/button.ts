@@ -47,7 +47,7 @@ export class Button {
 	 * Set the button's disabled state.
 	 * @param state
 	 */
-	setEnabled(state: boolean) {
+	public setEnabled(state: boolean) {
 		this.button.Enabled = state;
 	}
 
@@ -55,7 +55,7 @@ export class Button {
 	 * Set the button's press state (visually)
 	 * @param state
 	 */
-	setPressed(state: boolean) {
+	public setPressed(state: boolean) {
 		this.buttonState = state;
 		this.button.SetActive(this.buttonState);
 		this.clickEvent.Fire();
@@ -65,7 +65,7 @@ export class Button {
 	 * Listen to button presses on this toolbar button.
 	 * @param cb State of button (if toggleable)
 	 */
-	onPress(cb: (state: boolean) => void) {
+	public onPress(cb: (state: boolean) => void) {
 		this.clickEvent.Connect(() => {
 			cb(this.buttonState);
 		});

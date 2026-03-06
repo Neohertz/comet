@@ -10,7 +10,7 @@ const HttpService = game.GetService("HttpService");
  * A view is a container for GUI elements.
  */
 export class View {
-	readonly container: DockWidgetPluginGui | ScreenGui;
+	public readonly container: DockWidgetPluginGui | ScreenGui;
 	private onCloseBind: Signal;
 
 	/**
@@ -62,7 +62,7 @@ export class View {
 				)
 			);
 
-			(this.container as DockWidgetPluginGui).Title = name;
+			this.container.Title = name;
 			this.container.BindToClose(() => this.onCloseBind.Fire());
 		} else {
 			this.container = new Instance(
@@ -79,7 +79,7 @@ export class View {
 	 * Callback will be invoked whenever the window closes.
 	 * @param cb
 	 */
-	onClose(cb: () => void) {
+	public onClose(cb: () => void) {
 		this.onCloseBind.Connect(cb);
 	}
 
@@ -87,7 +87,7 @@ export class View {
 	 * Fired whenever the window opens.
 	 * @param cb
 	 */
-	onOpen(cb: () => void) {
+	public onOpen(cb: () => void) {
 		Logger.warn("OnOpen is not implemented.");
 	}
 
@@ -95,7 +95,7 @@ export class View {
 	 * Set visibility of the window.
 	 * @param state boolean
 	 */
-	setVisible(state: boolean) {
+	public setVisible(state: boolean) {
 		if (this.container) {
 			this.container.Enabled = state;
 		}
@@ -105,7 +105,7 @@ export class View {
 	 * Link a toolbar button to the view so that the button's state controls the view's visibility and vice-versa.
 	 * @param button Button
 	 */
-	linkButton(button: Button) {
+	public linkButton(button: Button) {
 		if (!button.toggleable) {
 			Logger.fatal(
 				"Attempted to link a button to a view, but the button isn't toggleable. Please adjust the button's constructor to fix this."
@@ -120,7 +120,7 @@ export class View {
 	 * Returns the viewport size, but only will only function as expected in viewport mode.
 	 * @returns Vector2
 	 */
-	getViewportSize(): Vector2 {
+	public getViewportSize(): Vector2 {
 		return this.container.AbsoluteSize;
 	}
 
@@ -131,13 +131,15 @@ export class View {
 	 * @param createCopy boolean
 	 * @returns element
 	 */
-	mount<T extends GuiBase>(element: T, createCopy?: boolean): T;
+	public mount<T extends GuiBase>(element: T, createCopy?: boolean): T;
 	/**
-	 * Custom mounting method. Used to integrate ui-libraries like react and fusion.
+	 * Custom mounting method. Used to integrate ui-libraries like react, vide or fusion.
 	 * @param method (root: Instance) => (() => void)
 	 */
-	mount<T extends GuiBase>(method: (root: Instance) => () => void): void;
-	mount<T extends GuiBase>(
+	public mount<T extends GuiBase>(
+		method: (root: Instance) => () => void
+	): void;
+	public mount<T extends GuiBase>(
 		element: T | ((root: Instance) => () => void),
 		createCopy = false
 	) {
@@ -155,12 +157,5 @@ export class View {
 			this.state.tracker.handle(element);
 			return element;
 		}
-	}
-
-	/**
-	 * Only to be called internally.
-	 */
-	destroy() {
-		this.container?.Destroy();
 	}
 }

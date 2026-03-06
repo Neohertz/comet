@@ -7,11 +7,11 @@ export type TrackableObject =
 export class Tracker {
 	private store = new Array<TrackableObject>();
 
-	handle<T extends TrackableObject>(object: T) {
+	public handle<T extends TrackableObject>(object: T) {
 		this.store.push(object);
 	}
 
-	clean() {
+	public clean() {
 		for (const obj of this.store) {
 			if (typeIs(obj, "Instance")) {
 				obj?.Destroy();

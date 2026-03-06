@@ -26,15 +26,15 @@ export class Action {
 		state.tracker.handle(() => this.cleanup());
 	}
 
-	private cleanup() {
-		this.action.Destroy();
-	}
-
 	/**
 	 * Add a callback for when the action is triggered.
 	 * @param cb
 	 */
-	onTrigger(cb: () => void) {
+	public onTrigger(cb: () => void) {
 		this.state.tracker.handle(this.action.Triggered.Connect(cb));
+	}
+
+	private cleanup() {
+		this.action.Destroy();
 	}
 }

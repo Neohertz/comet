@@ -29,22 +29,17 @@ export class Menu {
 		state.tracker.handle(() => this.cleanup());
 	}
 
-	private cleanup() {
-		this.menus.forEach((e) => e.Destroy());
-		this.actions.forEach((e) => e.Destroy());
-	}
-
 	/**
 	 * Async function that shows context menu. Responses are handled in action declaration.
 	 */
-	async show() {
+	public async show() {
 		this.rootMenu.ShowAsync();
 	}
 
 	/**
 	 * Separate Menu
 	 */
-	separator() {
+	public separator() {
 		this.currentMenu.AddSeparator();
 		return this;
 	}
@@ -56,7 +51,7 @@ export class Menu {
 	 * @param cb
 	 * @returns
 	 */
-	action(title: string, icon?: string, cb?: () => void) {
+	public action(title: string, icon?: string, cb?: () => void) {
 		const action = this.currentMenu.AddNewAction(
 			HttpService.GenerateGUID(),
 			title,
@@ -72,7 +67,7 @@ export class Menu {
 	 * @param title
 	 * @param icon
 	 */
-	submenu(title?: string, icon?: string) {
+	public submenu(title?: string, icon?: string) {
 		assert(this.state.appPlugin, CometError.APP_NOT_CREATED);
 		const menu = this.state.appPlugin.CreatePluginMenu(
 			HttpService.GenerateGUID(),
@@ -89,8 +84,13 @@ export class Menu {
 	/**
 	 * Selects the root menu. Useful for adding top-level context menu items after a submenu.
 	 */
-	root() {
+	public root() {
 		this.currentMenu = this.rootMenu;
 		return this;
+	}
+
+	private cleanup() {
+		this.menus.forEach((e) => e.Destroy());
+		this.actions.forEach((e) => e.Destroy());
 	}
 }
