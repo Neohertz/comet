@@ -18,10 +18,10 @@ hero:
 
 features:
   - title: Simple
-    details: Comet v2.0 is easy to use and is well documented.
+    details: Comet takes the headache out of plugin structure and lifecycle management so you can focus on building.
   - title: Familiar
-    details: Retains the service model that roblox-ts developers have come to love.
+    details: Comet retains the singleton model that roblox-ts developers have come to love.
   - title: Feature Packed
-    details: Comet comes loaded with a plethora of features to help you build your dream plugin faster.
+    details: Comet comes loaded with a plethora of helpful systems to help you build your dream plugin faster.
 ---
 

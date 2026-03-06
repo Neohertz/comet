@@ -1,39 +1,41 @@
 # Dependency
-Register a dependency within a system.
+`Dependency()` resolves another registered system and returns its singleton instance.
 
 ::: warning
-This should only be called within the constructor. Failure to do so will result in errors.
-
-See the `Usage` field for valid examples.
+Call `Dependency()` only during system construction: field initializers, constructor parameters, or constructor body code. Calling it later throws at runtime.
 :::
-
 
 ## Type
 ```ts
 Dependency<T>(dependency: ClassRef<T>): T
 ```
 
+## Behavior
+
+- Resolves the requested system from comet's registry.
+- Constructs lazy systems the first time they are requested.
+- Rejects self-dependencies.
+- Records the dependency so it can be initialized before launch completes.
+
 ## Usage
 ```ts
+import { Audio, Dependency, GUI, History, OnInit, Studio, System } from "@rbxts/comet";
+
 @System()
-class MySystem implements OnInit {
-	// ✅ Valid - Complies within constructor.
-	private gui = Dependency(GUI)
+export class MySystem implements OnInit {
+	private gui = Dependency(GUI);
 
 	constructor(
-		// ✅ Valid
-		private audio = Dependency(Audio)
+		private audio = Dependency(Audio),
 	) {
-		// ✅ Valid
-		const studio = Dependency(Studio)
+		const studio = Dependency(Studio);
 	}
 
 	onInit() {
-		// ❌ Invalid! Cannot use Dependency() outside of constructor.
-		const history = Dependency(History)
+		// Invalid: this is no longer constructor-time code.
+		const history = Dependency(History);
 	}
 }
 ```
 
-
-## 
+If you need a system later, store the reference during construction and reuse it.

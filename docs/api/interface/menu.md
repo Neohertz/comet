@@ -1,26 +1,31 @@
-
 # Menu
-> Related: [GUI System](/api/modules/gui)
+> Related: [GUI](/api/modules/gui)
 
-The menu is a builder that allows you to construct context menus.
+`Menu` is a small builder for `PluginMenu` trees.
+
+## Builder methods
+
+- `action(title, icon?, cb?)` adds an item to the current menu and returns the builder.
+- `separator()` adds a separator to the current menu and returns the builder.
+- `submenu(title?, icon?)` creates a submenu, selects it as the current target, and returns the builder.
+- `root()` switches back to the top-level menu and returns the builder.
+- `show()` opens the menu asynchronously.
 
 ## Usage
-```ts 
-const contextMenu = GUI.buildMenu()
-    .action(
-        "Select all items in Workspace", 
-        "icon_asset_id", 
-        () => {
-		    this.select(game.Workspace.GetChildren());
-	    }
-    ) // Example of a functional button
-    .seperator()
-	.submenu("Misc Methods")
-        .action("Do something")
-        .action("Do something else");
-		.root() // Return back to the root
-	.subMenu("More Methods")
-		.action("Do yet another thing.");
+```ts
+const menu = gui
+    .buildMenu()
+    .action("Select everything", undefined, () => {
+        this.studio.select(workspace.GetChildren());
+    })
+    .separator()
+    .submenu("Utilities")
+    .action("Print selection", undefined, () => {
+        print(this.studio.getSelection().size());
+    })
+    .root();
 
-contextMenu.show()
+await menu.show();
 ```
+
+Action callbacks are registered when you build the menu. `show()` does not return the selected action.

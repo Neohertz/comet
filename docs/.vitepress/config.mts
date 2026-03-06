@@ -2,14 +2,15 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-	title: "Comet v2.0",
+	title: "Comet 2.0",
 	base: "/comet/",
-	description: "Documentation for Comet v2.0",
+	appearance: "dark",
+	description: "Documentation for Comet",
 	themeConfig: {
 		// https://vitepress.dev/reference/default-theme-config
 		nav: [
 			{ text: "Home", link: "/" },
-			{ text: "Setup", link: "/setup/overview" },
+			{ text: "Getting Started", link: "/setup/overview" },
 			{ text: "API", link: "/api/globals/comet" }
 		],
 
@@ -18,8 +19,11 @@ export default defineConfig({
 				{
 					text: "Getting Started",
 					items: [
-						{ text: "Overview", link: "/setup/overview" },
-						{ text: "Project Setup", link: "/setup/setup" }
+						{ text: "About Comet", link: "/setup/overview" },
+						{ text: "Anatomy of a System", link: "/setup/systems" },
+						{ text: "Internal Utility Systems", link: "/setup/utility-systems.md" },
+						{ text: "User Interface", link: "/setup/ui.md" },
+						{ text: "Housekeeping", link: "/setup/memory.md" },
 					]
 				}
 			],

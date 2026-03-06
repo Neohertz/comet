@@ -1,53 +1,91 @@
-# History System
-The history system provides a handy API for recording changes made by your plugin.
+# History
+`History` is an internal utility system for undo and redo recording.
 
-::: warning
-You must load this module via the `Dependency` global.
-:::
+Fetch it with `Dependency(History)` from one of your own systems.
 
 ## `record()`
-Method for recoding waypoints to undo/redo history.
 
-### Usage
+Starts a `ChangeHistoryService` recording and returns control methods for finishing it.
+
+### Type
 ```ts
-const recording = history.record("Do Stuff");
-
-const [success, result] = pcall(() => {
-	// do something
-});
-
-if (success) {
-	recording.commit();
-} else {
-	recording.cancel();
+record(name: string, description?: string): {
+	commit(options?: object): void;
+	append(options?: object): void;
+	cancel(options?: object): void;
 }
 ```
 
-## `try()`
-A pcall-like wrapper for `record()` that allows you to quickly try an operation and abort changes if it fails.
+### Notes
+
+- If another recording is still open, comet cancels the older recording, logs a warning, and starts a new one.
+- `commit()` finishes with `Enum.FinishRecordingOperation.Commit`.
+- `append()` finishes with `Enum.FinishRecordingOperation.Append`.
+- `cancel()` finishes with `Enum.FinishRecordingOperation.Cancel`.
 
 ### Usage
 ```ts
-history.try("Try Making Parts", () => {
-	// Example of some code that can error.
-	for (let i = 0; i < 100; i++) {
-		new Instance("Part", Workspace);
-		if (math.random(1, 10) === 10) {
-			error();
+const recording = this.history.record("Create Part");
+
+const part = new Instance("Part");
+part.Parent = workspace;
+
+recording.commit();
+```
+
+## `try()`
+
+Wraps `record()` in a `pcall`-style flow.
+
+### Type
+```ts
+try<T extends Callback>(name: string, fn: T, ...args: Parameters<T>): Promise<ReturnType<T>>
+try<T extends Callback>(
+	config: {
+		name: string;
+		description?: string;
+		onSuccess?: "commit" | "append" | "cancel";
+	},
+	fn: T,
+	...args: Parameters<T>
+): Promise<ReturnType<T>>
+```
+
+### Notes
+
+- `onSuccess` defaults to `commit`.
+- The callback itself is run with `pcall`. Errors thrown directly in the callback cancel the recording and are rethrown.
+- `History.try()` does not await asynchronous work inside the callback before finishing the recording.
+
+### Usage
+```ts
+await this.history.try(
+	{
+		name: "Duplicate Selection",
+		onSuccess: "append",
+	},
+	() => {
+		for (const instance of game.GetService("Selection").Get()) {
+			instance.Clone().Parent = instance.Parent;
 		}
-	}
-})
-	.then(() => {
-		print("Successfully created parts!!");
-	})
-	// If the code errors, all created parts will be undone.
-	.catch((err) => {
-		print("Failed to create parts!", err);
-	});
+	},
+);
 ```
 
 ## `undo()`
-Undo the last action.
+
+Calls `ChangeHistoryService.Undo()`.
+
+### Type
+```ts
+undo(): void
+```
 
 ## `redo()`
-Redo the last action.
+
+Calls `ChangeHistoryService.Redo()`.
+
+### Type
+```ts
+redo(): void
+```

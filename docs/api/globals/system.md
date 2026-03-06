@@ -1,24 +1,29 @@
 # System
-Registers the decorated class as a system within comet.
+`@System()` registers a class as a comet-managed singleton.
 
 ## Type
 ```ts
 type SystemConfig = {
-	// Denotes that this system should only be initialized once
-	// it's used as a dependency to another system.
-	lazy?: boolean
-}
+	lazy?: boolean;
+};
 
 System(config: SystemConfig = {})
 ```
 
-## Usage
+## Notes
 
+- Systems are constructed once and reused.
+- A lazy system is not constructed during registration. It is constructed the first time another system requests it with `Dependency()`.
+- Lifecycle hooks such as `onInit()` and `onStart()` are optional.
+
+## Usage
 ```ts
+import { OnInit, System } from "@rbxts/comet";
+
 @System()
-class MySystem implements OnInit {
+export class MySystem implements OnInit {
 	public onInit() {
-		print("Hello, world!")
+		print("Hello, world!");
 	}
 }
 ```

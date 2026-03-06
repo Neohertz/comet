@@ -1,30 +1,37 @@
-
 # Button
-> Related: [GUI System](/api/modules/gui)
+> Related: [GUI](/api/modules/gui)
+
+`Button` wraps a `PluginToolbarButton` created through `GUI.createButton()`.
 
 ## `setEnabled()`
-Set the `Enabled` state of the toolbar button.
 
-### Usage
-```ts filename="Type"
-this.setEnabled(state: boolean): void
+Sets the toolbar button's `Enabled` state.
+
+### Type
+```ts
+setEnabled(state: boolean): void
 ```
 
 ## `setPressed()`
-Set the `Active` state of the toolbar button. Also toggles the `Enabled` state as well.
 
-### Usage
-```ts filename="Type"
-this.setPressed(state: boolean): void
+Sets the button's active state and then fires registered `onPress()` callbacks with the updated state.
+
+### Type
+```ts
+setPressed(state: boolean): void
 ```
 
 ## `onPress()`
-Bind a callback that is invoked whenever the button is pressed.
 
-### Usage
-```ts filename="Type"
-this.onPress(cb: (state: boolean) => void): void
+Registers a callback that runs whenever the button is pressed.
+
+### Type
+```ts
+onPress(cb: (state: boolean) => void): Button
 ```
 
-You can also bind a button directly to the visibility of a view.
-See the [view](/api/interface/view) documentation for more information.
+### Notes
+
+- `state` is the current pressed state.
+- Non-toggleable buttons still invoke the callback, but the state stays `false` unless you call `setPressed()` yourself.
+- Use [View.linkButton()](/api/interface/view) if the button should directly control a view.

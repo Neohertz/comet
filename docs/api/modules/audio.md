@@ -1,37 +1,64 @@
-# Audio System
-A system that provides easy methods for playing sounds from your plugin.
+# Audio
+`Audio` is an internal utility system for plugin sound playback.
 
-::: warning
-You must load this module via the `Dependency` global.
-:::
+Fetch it with `Dependency(Audio)` from one of your own systems.
 
 ## `preloadSounds()`
-Pass an array of sound ids (string) to be cached. This ensures that they will be ready once they are needed.
 
+Creates or reuses cached `Sound` instances and preloads them through `ContentProvider`.
+
+### Type
 ```ts
-...
-onInit() {
-	Audio.preloadSounds(["id1", "id2", "id3"])
+preloadSounds(ids: string[]): Promise<void>
+```
+
+### Usage
+```ts
+import { Audio, Dependency, OnInit, System } from "@rbxts/comet";
+
+@System()
+export class SoundSystem implements OnInit {
+	private audio = Dependency(Audio);
+
+	onInit() {
+		this.audio.preloadSounds([
+			"rbxassetid://1234567890",
+			"rbxassetid://0987654321",
+		]);
+	}
 }
 ```
 
 ## `play()`
-Play a sound. The sound will be cached to make future calls faster.
+
+Plays a cached sound. If the sound has already been created, comet reuses it.
+
+### Type
+```ts
+play(id: string, looped = false): void
+```
 
 ### Usage
-
 ```ts
-...
-onInit() {
-	Audio.play("sound_id_here")
-}
+this.audio.play("rbxassetid://1234567890");
 ```
 
 ## `playUnique()`
-Bypass the cache and play a sound directly. The sound will be destroyed once it's finished playing.
+
+Creates a new `Sound`, plays it, and schedules cleanup through comet's tracker.
+
+### Type
 ```ts
-...
-onInit() {
-	Audio.playUnique("sound_id_here")
-}
+playUnique(id: string, looped = false): Sound
+```
+
+### Notes
+
+- The sound is not added to the cache.
+- Cleanup is scheduled with `task.delay(sound.TimeLength, ...)`.
+
+### Usage
+```ts
+const sound = this.audio.playUnique("rbxassetid://1234567890");
+sound.Volume = 0.25;
 ```

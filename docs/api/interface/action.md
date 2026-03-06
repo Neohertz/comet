@@ -1,13 +1,25 @@
-
 # Action
-> Related: [Studio System](/api/modules/studio)
+> Related: [Studio](/api/modules/studio)
+
+`Action` wraps a `PluginAction` created through `Studio.createAction()`.
 
 ## `onTrigger()`
-Subscribe to the trigger event of the action. This event is fired whenever the action is triggered, whether through a keybind or through the command palette.
+
+Registers a callback that fires when the plugin action is triggered.
+
+### Type
+```ts
+onTrigger(cb: () => void): void
+```
+
+### Notes
+
+- The callback fires whether the action was invoked from a keybind, the command palette, or another Studio entry point.
+- The connection is tracked automatically and cleaned up when the plugin unloads.
 
 ### Usage
-```ts filename="Type"
-myAction.onTrigger(() => {
-	Logger.verbose("Action triggered!")
-})
+```ts
+action.onTrigger(() => {
+	print("Action triggered");
+});
 ```

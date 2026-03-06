@@ -1,68 +1,89 @@
 # View
-> Related: [GUI System](/api/modules/gui)
+> Related: [GUI](/api/modules/gui)
 
-A view is a container for UI within comet.
+`View` is comet's UI container abstraction. A view wraps either a dock widget or a viewport overlay and gives you a consistent API for mounting UI.
 
+## Visibility
 
+Views start hidden by default. After mounting content, either call `setVisible(true)` yourself or link the view to a toggleable [Button](/api/interface/button) with `linkButton()`.
 
 ## `mount()`
-Mount a ui element or component tree to the viewport. 
+
+Mounts UI into the view.
 
 ### Type
-```ts 
-mount(method: ((root: Instance) => (() => void)) | Instance): void;
-```
-
-### Usage
-You can mount any ui framwork you'd like with a story-like api.
 ```ts
-this.view.mount((root) => {
+mount<T extends GuiBase>(element: T, createCopy?: boolean): T;
+mount(method: (root: Instance) => () => void): void;
+```
+
+### Notes
+
+- The direct-instance overload reparents the `GuiBase` into the view.
+- Set `createCopy` to `true` to clone the element before it is reparented.
+- The function overload is intended for React, Fusion, Vide, or any other UI runtime that returns an unmount callback.
+
+### Usage
+```ts
+view.mount((root) => {
 	const unmount = createReactTree(root);
-	return () => unmount()
-}))
+	return () => unmount();
+});
 ```
 
-Alternatively, you can also directly mount an instance.
-
-```ts 
-this.view.mount(new Instance("Frame"))
+```ts
+const frame = new Instance("Frame");
+view.mount(frame);
 ```
 
+## `onClose()`
 
+Registers a callback that fires when a dock widget is closed.
 
-
-## `onClose()` &  `onOpen()`
-Bind a callback to be invoked when the view is opened or closed.
-### Usage
-```ts 
-this.onClose(cb: () => void): void
-this.onOpen(cb: () => void): void
+### Type
+```ts
+onClose(cb: () => void): void
 ```
 
-## `setVisible()` 
-Set the visibility of the window.
-### Usage
-```ts 
-this.setVisible(state: boolean): void
+## `onOpen()`
+
+This method exists on the class, but it is not implemented in the current codebase. Calling it logs a warning.
+
+### Type
+```ts
+onOpen(cb: () => void): void
 ```
 
-## `linkButton()` 
-Link a toolbar button to the visibility of the view.
+## `setVisible()`
+
+Sets the view's enabled state.
+
+### Type
+```ts
+setVisible(state: boolean): void
+```
+
+## `linkButton()`
+
+Synchronizes a toggleable toolbar button with the view's visibility.
 
 ::: warning
-This will throw an error if the button isn't configured as toggleable.
+This throws if the button is not toggleable.
 :::
 
-### Usage
-```ts 
-this.linkButton(button: Button): void
+### Type
+```ts
+linkButton(button: Button): void
 ```
 
-## `getViewportSize()` 
-Returns the viewport size, but only will only function as expected in viewport mode.
-### Usage
+When the view is closed, comet also clears the linked button's pressed state.
 
-```ts 
-this.getViewportSize(): Vector2
+## `getViewportSize()`
+
+Returns `container.AbsoluteSize`.
+
+### Type
+```ts
+getViewportSize(): Vector2
 ```
 

@@ -1,62 +1,96 @@
 # Comet
-Comet's initialization methods.
+`Comet` exposes the framework bootstrap API. In a typical plugin, you call these methods in order: `createApp()`, `addPaths()`, then `launch()`.
 
 ## `createApp()`
 
-Setup the comet app. The name will be used for the plugin ribbon.
+Registers unload handling and sets the plugin name used for the toolbar.
 
 ### Type
 ```ts
 createApp(name: string, enabledWhileRunning = false): void
 ```
 
+### Notes
+
+- `name` becomes the toolbar name used by [GUI](/api/modules/gui).
+- If Studio is currently running and `enabledWhileRunning` is `false`, this call becomes a no-op.
+- Unload cleanup is registered here, so call this before launching comet.
+
 ### Usage
 ```ts
-Comet.createApp("MyAwesomeApp")
+import { Comet } from "@rbxts/comet";
+
+Comet.createApp("My Plugin");
 ```
 
 ## `addPaths()`
 
-Used to find and register systems within a folder or instance.
-### Type 
+Requires modules from an instance so decorated systems can register themselves.
+
+### Type
 ```ts
 addPaths(path?: Instance, recursive = false): void
 ```
 
+### Notes
+
+- Although the signature marks `path` as optional, the implementation asserts that a valid instance is present at runtime.
+- When `recursive` is `true`, comet scans descendants. Otherwise it scans only direct children.
+- Only `ModuleScript` children are loaded.
+- If Studio is currently running and the app was not created with `enabledWhileRunning = true`, this call becomes a no-op.
+
 ### Usage
 ```ts
-// Recursively search through the "systems" folder.
-Comet.addPaths(script.Parent:FindFirstChild("systems"), true)
+import { Comet } from "@rbxts/comet";
+
+Comet.addPaths(script.Parent!.WaitForChild("systems"), true);
 ```
 
-
 ## `configureLogger()`
-Configure the internal logger. By default, the log level is set to `LogLevel.FATAL`.
 
-### Type 
+Configures the shared [Logger](/api/globals/logger) instance used by comet.
+
+### Type
 ```ts
 configureLogger(level: LogLevel, showLevel = true, showPluginName = false): void
 ```
 
+### Notes
+
+- `showLevel` controls whether prefixes such as `[WARN]` are included.
+- `showPluginName` adds the app name from `createApp()` as a prefix.
+- This updates the logger at runtime.
+
 ### Usage
 ```ts
-// Only allow errors with no fluff.
-Comet.configureLogger(LogLevel.ERROR, false, false)) 
+import { Comet, LogLevel } from "@rbxts/comet";
+
+Comet.configureLogger(LogLevel.ERROR, false, false);
 ```
 
 ## `launch()`
-Launch comet. Initialize all systems and dependencies, and launch any lifecycle methods.
+
+Initializes registered systems, resolves queued dependencies, and starts lifecycle hooks.
 
 ::: warning
-This should only be called after app creation and path registration.
+Call this only after `createApp()` and `addPaths()` have run.
 :::
 
-### Type 
+### Type
 ```ts
 launch(): void
 ```
 
+### Notes
+
+- `onInit()` runs before any `onStart()`, `onRender()`, or `onHeartbeat()` hook is attached.
+- `onStart()` is spawned with `task.spawn()`.
+- `onRender()` and `onHeartbeat()` are connected through `RunService` and tracked for cleanup.
+- If Studio is currently running and the app was not created with `enabledWhileRunning = true`, this call becomes a no-op.
+
 ### Usage
 ```ts
-Comet.launch()
+import { Comet } from "@rbxts/comet";
+
+Comet.launch();
 ```

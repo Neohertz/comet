@@ -1,14 +1,11 @@
-# GUI System
-Allows you to define plugin UI elements easily.
+# GUI
+`GUI` is an internal utility system for building plugin UI wrappers.
 
-::: warning
-You must load this module via the `Dependency` global.
-:::
+Fetch it with `Dependency(GUI)` from one of your own systems.
 
 ## `createWidget()`
-> Returns [View](/api/interface/view).
 
-Create a dock widget.
+Creates a dock widget [View](/api/interface/view).
 
 ### Type
 ```ts
@@ -22,21 +19,27 @@ createWidget(
 
 ### Usage
 ```ts
-@System()
-class MySystem() {
-	private GUI = Dependency(GUI)
-	private view: View
+import { Dependency, GUI, OnInit, System } from "@rbxts/comet";
 
-	constructor() {
-		this.view = GUI.createWidget("MyWidget", Vector2.zero, Vector2.zero)
+@System()
+export class MySystem implements OnInit {
+	private gui = Dependency(GUI);
+
+	onInit() {
+		const view = this.gui.createWidget(
+			"My Widget",
+			new Vector2(320, 240),
+			new Vector2(240, 180),
+		);
+
+		view.setVisible(true);
 	}
 }
 ```
 
 ## `createOverlay()`
-> Returns [View](/api/interface/view).
 
-Create a overlay that is mounted to the studio viewport.
+Creates an overlay [View](/api/interface/view) backed by a `ScreenGui` in `CoreGui`.
 
 ### Type
 ```ts
@@ -45,21 +48,22 @@ createOverlay(name: string): View
 
 ### Usage
 ```ts
-@System()
-class MySystem() {
-	private GUI = Dependency(GUI)
-	private view: View
+const overlay = this.gui.createOverlay("Selection Overlay");
+overlay.setVisible(true);
+```
 
-	constructor() {
-		this.view = GUI.createOverlay("MyOverlay")
-	}
-}
+## `buildMenu()`
+
+Creates a [Menu](/api/interface/menu) builder.
+
+### Type
+```ts
+buildMenu(): Menu
 ```
 
 ## `createButton()`
-> Returns [Button](/api/interface/button).
 
-Create a ribbon button.
+Creates a toolbar [Button](/api/interface/button).
 
 ### Type
 ```ts
@@ -72,25 +76,27 @@ createButton(
 ): Button
 ```
 
+### Notes
+
+- `toggleable` defaults to `true`.
+- `enabledOutsideViewport` maps to `ClickableWhenViewportHidden` and defaults to `false`.
+
 ### Usage
 ```ts
-@System()
-class MySystem() {
-	private GUI = Dependency(GUI)
-	private view: View
-	private button: Button
+const view = this.gui.createWidget(
+	"My Widget",
+	new Vector2(320, 240),
+	new Vector2(240, 180),
+);
 
-	constructor() {
-		this.view = GUI.createWidget("MyWidget", Vector2.zero, Vector2.zero)
-		this.button = GUI.createButton("MyButton", "", "")
+const button = this.gui.createButton(
+	"Toggle Widget",
+	"Show or hide the widget",
+	"rbxassetid://1234567890",
+	true,
+);
 
-		// Control the view's visibility with the button.
-		this.view.linkButton(this.button)
-	}
-}
+view.linkButton(button);
 ```
-
-## `buildMenu()`
-See [Menu](/api/interface/menu).
 
 

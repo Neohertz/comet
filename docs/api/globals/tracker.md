@@ -1,32 +1,39 @@
 # Track
-Track is comet's internal maid. You can use this to track instances and ensure they are cleaned up when the plugin unloads.
+`Track()` registers a resource with comet's internal tracker so it is cleaned up when the plugin unloads.
 
-### Trackable Objects <Badge type="warning" text="as of v2.0.0" />
-- RBXScriptConnections
-- Threads
-- Instances
-- Functions
+## Trackable objects
 
+- `Instance`
+- `RBXScriptConnection`
+- `thread`
+- `Callback`
 
 ## Type
 ```ts
-Track(object: TrackableObject)
+Track(object: TrackableObject): void
 ```
 
+## Notes
+
+- Tracked instances are destroyed.
+- Tracked connections are disconnected.
+- Tracked threads are canceled.
+- Tracked callbacks are invoked.
+- Cleanup happens before comet calls system `onEnd()` methods.
+
 ## Usage
-
 ```ts
-@System()
-class MySystem implements OnInit {
-	public onInit() {
-		// Track Threads
-		Track(task.spawn(() => {
-			task.wait(10)
-			print("Hello!")
-		}))
+import { OnInit, System, Track } from "@rbxts/comet";
 
-		// Track Instances
-		Track(new Instance("Part", Workspace))
+@System()
+export class MySystem implements OnInit {
+	public onInit() {
+		Track(task.spawn(() => {
+			task.wait(10);
+			print("Hello!");
+		}));
+
+		Track(new Instance("Part", workspace));
 	}
 }
 ```
