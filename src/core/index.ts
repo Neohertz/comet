@@ -42,7 +42,10 @@ const cometState: CometState = {
  * @param condition
  * @param message
  */
-function cleanAssert<T>(condition: T, message?: unknown): asserts condition {
+function cleanAssert<T extends boolean>(
+	condition: T,
+	message?: unknown
+): asserts condition {
 	debug.traceback();
 	if (!condition) error(`[Comet] ${message}`, 0);
 }
@@ -183,7 +186,7 @@ export function GetPlugin() {
  */
 export function Dependency<T>(dependency: ClassRef<T>): T {
 	cleanAssert(
-		cometState.depTarget,
+		cometState.depTarget !== undefined,
 		CometError.DEPENDENCY_OUTSIDE_CONSTRUCTOR
 	);
 
@@ -208,7 +211,10 @@ export function Dependency<T>(dependency: ClassRef<T>): T {
 		cometState.depTarget = lastTarget;
 	}
 
-	cleanAssert(depService, string.format(CometError.INVALID_SYSTEM, depName));
+	cleanAssert(
+		depService !== undefined,
+		string.format(CometError.INVALID_SYSTEM, depName)
+	);
 	cometState.dependencies.push(depName);
 
 	Logger.system(
@@ -294,14 +300,17 @@ export namespace Comet {
 	 */
 	export function launch() {
 		if (isRunning && !cometState.runInPlayMode) return;
-		cleanAssert(cometState.appPlugin, CometError.APP_NOT_CREATED);
+		cleanAssert(
+			cometState.appPlugin !== undefined,
+			CometError.APP_NOT_CREATED
+		);
 
 		for (const depName of cometState.dependencies)
 			initializeSystem(depName);
 		for (const [depName] of cometState.registry) initializeSystem(depName);
 
 		Logger.system(
-			`Successfully lauched ${cometState.registry.size()} systems. (${cometState.dependencies.size()} Dependencies resolved)`
+			`Successfully launched ${cometState.registry.size()} systems. (${cometState.dependencies.size()} Dependencies resolved)`
 		);
 
 		for (const [_, service] of cometState.registry) {
