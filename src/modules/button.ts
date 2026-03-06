@@ -8,17 +8,16 @@ import { CometState } from "./../types/comet.d";
 export class Button {
 	private button: PluginToolbarButton;
 	private buttonState: boolean;
-	private toggleable: boolean;
 
 	private clickEvent: Signal;
 
 	constructor(
-		private state: CometState,
-		text: string,
-		toolTip: string,
-		image: string,
-		toggleable = true,
-		enabledOutsideViewport = false
+		readonly state: CometState,
+		readonly text: string,
+		readonly toolTip: string,
+		readonly image: string,
+		public readonly toggleable = true,
+		readonly enabledOutsideViewport = false
 	) {
 		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
@@ -39,9 +38,6 @@ export class Button {
 				}
 
 				this.button.SetActive(this.buttonState);
-				this.button.Enabled = !this.button.Enabled;
-				this.button.Enabled = true;
-
 				this.clickEvent.Fire();
 			})
 		);
@@ -62,8 +58,6 @@ export class Button {
 	setPressed(state: boolean) {
 		this.buttonState = state;
 		this.button.SetActive(this.buttonState);
-		this.button.Enabled = !this.button.Enabled;
-		this.button.Enabled = true;
 		this.clickEvent.Fire();
 	}
 

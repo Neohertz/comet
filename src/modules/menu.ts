@@ -13,7 +13,7 @@ export class Menu {
 	private menus: PluginMenu[];
 	private actions: PluginAction[];
 
-	constructor(private state: CometState) {
+	constructor(private readonly state: CometState) {
 		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
 		this.menus = new Array();

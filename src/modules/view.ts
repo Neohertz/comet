@@ -33,11 +33,11 @@ export class View {
 		dockState?: Enum.InitialDockState
 	);
 	constructor(
-		private state: CometState,
-		name: string,
-		size?: Vector2,
-		minSize?: Vector2,
-		dockState = Enum.InitialDockState.Float
+		private readonly state: CometState,
+		readonly name: string,
+		readonly size?: Vector2,
+		readonly minSize?: Vector2,
+		readonly dockState = Enum.InitialDockState.Float
 	) {
 		assert(
 			!state.windows.has(name),
@@ -106,6 +106,12 @@ export class View {
 	 * @param button Button
 	 */
 	linkButton(button: Button) {
+		if (!button.toggleable) {
+			Logger.fatal(
+				"Attempted to link a button to a view, but the button isn't toggleable. Please adjust the button's constructor to fix this."
+			);
+		}
+
 		this.onCloseBind.Connect(() => button.setPressed(false));
 		button.onPress((state) => this.setVisible(state));
 	}

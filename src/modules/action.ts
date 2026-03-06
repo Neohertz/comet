@@ -7,12 +7,12 @@ export class Action {
 	private action: PluginAction;
 
 	constructor(
-		private state: CometState,
-		id: string,
-		name: string,
-		statusTip: string,
-		icon?: string,
-		allowBinding?: boolean
+		private readonly state: CometState,
+		readonly id: string,
+		readonly name: string,
+		readonly statusTip: string,
+		readonly icon?: string,
+		readonly allowBinding?: boolean
 	) {
 		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
