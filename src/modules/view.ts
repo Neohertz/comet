@@ -12,6 +12,7 @@ const HttpService = game.GetService("HttpService");
 export class View {
 	public readonly container: DockWidgetPluginGui | ScreenGui;
 	private onCloseBind: Signal;
+	private onOpenBind: Signal;
 
 	/**
 	 * Create a window that renders on the viewport.
@@ -46,6 +47,7 @@ export class View {
 		assert(state.appPlugin, CometError.APP_NOT_CREATED);
 
 		this.onCloseBind = new Signal();
+		this.onOpenBind = new Signal();
 
 		// If both size and maxSize are given, we know we are creating a dock widget.
 		if (size && minSize) {
@@ -88,7 +90,7 @@ export class View {
 	 * @param cb
 	 */
 	public onOpen(cb: () => void) {
-		Logger.warn("OnOpen is not implemented.");
+		this.onOpenBind.Connect(cb);
 	}
 
 	/**
@@ -98,7 +100,17 @@ export class View {
 	public setVisible(state: boolean) {
 		if (this.container) {
 			this.container.Enabled = state;
+			if (state) this.onOpenBind.Fire();
+			else this.onCloseBind.Fire();
 		}
+	}
+
+	/**
+	 * Get the visibility state of the window.
+	 * @returns boolean
+	 */
+	public isVisible(): boolean {
+		return this.container.Enabled;
 	}
 
 	/**

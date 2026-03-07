@@ -38,7 +38,7 @@ view.mount(frame);
 
 ## `onClose()`
 
-Registers a callback that fires when a dock widget is closed.
+Registers a callback that fires when a dock widget is closed by any source.
 
 ### Type
 ```ts
@@ -47,11 +47,20 @@ onClose(cb: () => void): void
 
 ## `onOpen()`
 
-This method exists on the class, but it is not implemented in the current codebase. Calling it logs a warning.
+Registers a callback that fires when a dock widget is opened manually.
 
 ### Type
 ```ts
 onOpen(cb: () => void): void
+```
+
+## `isVisible()`
+
+Returns the view's visibility state.
+
+### Type
+```ts
+isVisible(): boolean
 ```
 
 ## `setVisible()`
