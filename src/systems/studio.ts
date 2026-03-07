@@ -23,18 +23,50 @@ export class Studio {
 	 * Access the plugin global.
 	 */
 	public plugin: Plugin;
+	private mouse: PluginMouse | undefined;
+	private exclusiveMouse: boolean | undefined;
 
 	constructor(private state: CometState) {
 		this.plugin = state.appPlugin;
 	}
 
 	/**
+	 * Activates the plugin and returns the mouse reference.
+	 *
+	 * You can call this method multiple times, but the plugin will only be activated on the first
+	 * call. Subsequent calls will simply return the mouse reference. If you wish to change the
+	 * exclusive mouse mode, pass the desired mode as an argument and the plugin will
+	 * be reactivated if necessary.
+	 *
+	 * @param exclusive Whether to activate the plugin in exclusive mouse mode.
+	 * @returns PluginMouse
+	 */
+	public getMouse(exclusive = false): PluginMouse {
+		if (
+			this.exclusiveMouse !== undefined &&
+			this.exclusiveMouse !== exclusive &&
+			this.plugin.IsActivated()
+		) {
+			this.plugin.Deactivate();
+			this.mouse = undefined;
+		}
+
+		if (!this.plugin.IsActivated()) {
+			this.plugin.Activate(exclusive);
+			this.exclusiveMouse = exclusive;
+		}
+
+		if (!this.mouse) this.mouse = this.plugin.GetMouse();
+		return this.mouse;
+	}
+
+	/**
 	 * Create a plugin action.
-	 * @param id
-	 * @param name
-	 * @param statusTip
-	 * @param icon
-	 * @param allowBinding
+	 * @param id - A unique identifier for the action.
+	 * @param name - The display name of the action.
+	 * @param statusTip - A brief description of the action's functionality, shown as a tooltip.
+	 * @param icon - (Optional) The asset ID of the icon to be displayed for the action.
+	 * @param allowBinding - (Optional) Whether to allow the user to bind a custom key to this action. Defaults to false.
 	 * @returns
 	 */
 	public createAction(
@@ -49,8 +81,8 @@ export class Studio {
 
 	/**
 	 * Select a ribbon tool
-	 * @param button
-	 * @param position
+	 * @param button - The ribbon tool to select.
+	 * @param position - The position to place the tool at. Only applicable for certain tools like the move tool.
 	 */
 	public selectTool(
 		button: Enum.RibbonTool,

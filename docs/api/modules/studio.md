@@ -7,6 +7,15 @@ Fetch it with `Dependency(Studio)` from one of your own systems.
 
 Exposes the underlying `Plugin` instance.
 
+## `getMouse()`
+
+Activates the plugin and returns the mouse reference.
+
+### Type
+```ts
+getMouse(exclusive = false): PluginMouse
+```
+
 ## `createAction()`
 
 Creates an [Action](/api/interface/action) wrapper.
