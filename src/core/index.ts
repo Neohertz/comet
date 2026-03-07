@@ -144,7 +144,8 @@ export function InternalSystem(config: SystemConfig = {}) {
  * ```
  * @param object
  */
-export function Track(object: TrackableObject) {
+export function Track(object: TrackableObject | undefined) {
+	if (!object) return;
 	cometState.tracker.handle(object);
 }
 
