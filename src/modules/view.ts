@@ -99,6 +99,7 @@ export class View {
 	 */
 	public setVisible(state: boolean) {
 		if (this.container) {
+			warn(state);
 			this.container.Enabled = state;
 			if (state) this.onOpenBind.Fire();
 			else this.onCloseBind.Fire();
@@ -124,7 +125,7 @@ export class View {
 			);
 		}
 
-		this.onCloseBind.Connect(() => button.setPressed(false));
+		this.onCloseBind.Connect(() => button.setPressed(false, true));
 		button.onPress((state) => this.setVisible(state));
 	}
 

@@ -53,12 +53,13 @@ export class Button {
 
 	/**
 	 * Set the button's press state (visually)
-	 * @param state
+	 * @param state New state of the button.
+	 * @param noUpdate If true, the click event will not fire.
 	 */
-	public setPressed(state: boolean) {
+	public setPressed(state: boolean, noUpdate = false) {
 		this.buttonState = state;
 		this.button.SetActive(this.buttonState);
-		this.clickEvent.Fire();
+		if (!noUpdate) this.clickEvent.Fire();
 	}
 
 	/**
