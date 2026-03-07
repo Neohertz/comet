@@ -99,7 +99,6 @@ export class View {
 	 */
 	public setVisible(state: boolean) {
 		if (this.container) {
-			warn(state);
 			this.container.Enabled = state;
 			if (state) this.onOpenBind.Fire();
 			else this.onCloseBind.Fire();
