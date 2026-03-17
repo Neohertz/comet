@@ -16,18 +16,36 @@ const ContentProvider = game.GetService("ContentProvider");
 export class Audio {
 	private soundContainer: View;
 	private soundCache: Map<string, Sound>;
+	private uniqueSounds: WeakSet<Sound>;
+
+	/**
+	 * The sound group that controls all sounds.
+	 */
+	private master: SoundGroup;
 
 	constructor(private state: CometState) {
 		const gui = Dependency(GUI);
 
+		this.master = new Instance("SoundGroup");
 		this.soundCache = new Map();
+		this.uniqueSounds = new Set();
 		this.soundContainer = gui.createWidget(
 			`${state.appName}_sfx`,
 			Vector2.zero,
 			Vector2.zero
 		);
 
-		state.tracker.handle(() => this.cleanup());
+		state.tracker.handle(() => this.cleanup(), this.master);
+	}
+
+	/**
+	 * Stop all **cached** sounds immediately. Will destroy any unique sound instances.
+	 */
+	public stopAll() {
+		this.uniqueSounds.forEach((obj) => obj?.Destroy());
+		this.soundCache.forEach((sound) => {
+			sound.Stop();
+		});
 	}
 
 	/**
@@ -57,12 +75,15 @@ export class Audio {
 	 */
 	public playUnique(id: string, looped = false): Sound {
 		const sound = this.createSound(id);
+		this.uniqueSounds.add(sound);
 		sound.Looped = looped;
 		sound.Play();
 
 		this.state.tracker.handle(
 			task.delay(sound.TimeLength, () => {
-				sound?.Destroy();
+				if (sound === undefined) return;
+				this.uniqueSounds.delete(sound);
+				sound.Destroy();
 			})
 		);
 
@@ -76,6 +97,7 @@ export class Audio {
 	 */
 	private createSound(id: string): Sound {
 		const sound = new Instance("Sound");
+		sound.SoundGroup = this.master;
 		sound.Parent = this.soundContainer.container;
 		sound.SoundId = id;
 
@@ -100,5 +122,6 @@ export class Audio {
 
 	private cleanup() {
 		for (const [_, sound] of this.soundCache) sound?.Destroy();
+		for (const sound of this.uniqueSounds) sound?.Destroy();
 	}
 }
