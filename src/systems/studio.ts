@@ -105,11 +105,11 @@ export class Studio {
 		if (this.getSelection().size() < 1) return false;
 
 		if (saveLocally) {
-			this.plugin.SaveSelectedToRoblox();
-			return true;
+			return this.plugin.PromptSaveSelection(suggestedFileName);
 		}
 
-		return this.plugin.PromptSaveSelection(suggestedFileName);
+		this.plugin.SaveSelectedToRoblox();
+		return true;
 	}
 
 	/**
