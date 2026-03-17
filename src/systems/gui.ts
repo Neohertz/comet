@@ -15,6 +15,22 @@ export class GUI {
 	constructor(private state: CometState) {}
 
 	/**
+	 * Close all of the active windows.
+	 */
+	public closeAllWindows(): void {
+		for (const [_, view] of this.state.windows) {
+			view.setVisible(false);
+		}
+	}
+
+	/**
+	 * Get a reference to the map of all windows.
+	 */
+	public getWindows(): Map<string, View> {
+		return this.state.windows;
+	}
+
+	/**
 	 * Create a view that exists in a widget.
 	 * @param name
 	 * @param size
