@@ -7,8 +7,8 @@ export type TrackableObject =
 export class Tracker {
 	private store = new Array<TrackableObject>();
 
-	public handle<T extends TrackableObject>(object: T) {
-		this.store.push(object);
+	public handle<T extends Array<TrackableObject>>(...objects: T) {
+		objects.move(0, objects.size() - 1, this.store.size(), this.store);
 	}
 
 	public clean() {

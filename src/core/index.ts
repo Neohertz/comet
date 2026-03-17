@@ -130,7 +130,7 @@ export function InternalSystem(config: SystemConfig = {}) {
 }
 
 /**
- * Track an object. This object will be cleaned up whenever the plugin unloads.
+ * Track a tuple of objects. These objects will be cleaned up whenever the plugin unloads.
  *
  * Can handle any instance, callback, thread, connection, etc.
  *
@@ -144,9 +144,8 @@ export function InternalSystem(config: SystemConfig = {}) {
  * ```
  * @param object
  */
-export function Track(object: TrackableObject | undefined) {
-	if (!object) return;
-	cometState.tracker.handle(object);
+export function Track<T extends Array<TrackableObject>>(...objects: T) {
+	cometState.tracker.handle(...objects);
 }
 
 /**
